@@ -1,0 +1,4 @@
+cd ~/workspaces/golden-agents/golden-agents-htr
+docker run -it -v $(pwd):/work -v ~/workspaces/golden-agents/pagexml:/data brambdocker/ga-experiments
+cd /work/experiments
+make
