@@ -2,12 +2,14 @@ import csv
 import glob
 
 from dataclasses import dataclass
+from dataclasses_json import dataclass_json
 
 DATA_DIR = '../../pagexml'
 SCANS_FILE = '../data/scans_20210403.csv'
 INVENTORY_FILE = '../data/werkvoorraad.csv'
 
 
+@dataclass_json
 @dataclass
 class ScanData:
     """Simple class for scan data"""
@@ -19,6 +21,7 @@ class ScanData:
     imageURL: str
 
 
+@dataclass_json
 @dataclass
 class WorkData:
     """Data from werkvoorraad"""
@@ -31,12 +34,14 @@ class WorkData:
     status: str
 
 
+@dataclass_json
 @dataclass
 class Writer:
     id: str
     name: str
 
 
+@dataclass_json
 @dataclass
 class Archive:
     inventoryNumber: int
@@ -77,11 +82,11 @@ def transkribus_url(archive_id: str, page_index: int) -> str:
 
 
 def scan_paths(scan_dir: str):
-    return glob.glob(f'{scan_dir}/*.xml')
+    return [x.replace('\\', '/') for x in glob.glob(f'{scan_dir}/*.xml')]
 
 
 def get_xml_paths():
-    archive_dirs = glob.glob(f'{DATA_DIR}/*[0-9]')
+    archive_dirs = [x.replace('\\', '/') for x in glob.glob(f'{DATA_DIR}/*[0-9]')]
     return {dir.split('/')[-1]: scan_paths(dir) for dir in archive_dirs}
 
 
