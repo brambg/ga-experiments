@@ -1,1 +1,3 @@
 icecream
+dataclasses-json
+analiticcl
