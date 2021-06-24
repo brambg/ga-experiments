@@ -2,6 +2,7 @@
 
 import argparse
 import json
+from datetime import datetime
 
 import lxml.etree
 
@@ -23,6 +24,7 @@ for filename in args.files:
     with open(filename) as f:
         original_xml = f.read()
     doc = lxml.etree.parse(filename).getroot()
+
     corrections = {}
     for element in doc.xpath("//pagexml:TextRegion/pagexml:TextLine/pagexml:TextEquiv/pagexml:Unicode",
                              namespaces={'pagexml': 'http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15'}):
@@ -36,6 +38,10 @@ for filename in args.files:
                 print()
     if (len(corrections) > 0):
         corrected_xml = original_xml
+        original_last_change = doc.xpath("//pagexml:Metadata/pagexml:LastChange", namespaces={
+            'pagexml': 'http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15'})[0].text
+        new_last_change = datetime.today().isoformat()
+        corrections[f'<LastChange>{original_last_change}</LastChange>'] = f'<LastChange>{new_last_change}</LastChange>'
         for o, c in corrections.items():
             corrected_xml = corrected_xml.replace(o, c)
         corrected_filename = filename.replace('.xml', '.corrected.xml')
