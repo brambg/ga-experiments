@@ -1,3 +1,4 @@
 icecream
 dataclasses-json
 analiticcl
+nltk
