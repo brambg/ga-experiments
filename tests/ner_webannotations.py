@@ -20,7 +20,8 @@ model.read_corpus(LOCATION_LEXICON)
 model.read_corpus(OCCUPATION_LEXICON)
 model.build()
 
-FILE = '../../pagexml/1285_KLAB05520/KLAB05520000004.xml'
+FILE = '../../pagexml/2408_A16098/a16098000013.xml'
+
 
 scan = parse_pagexml_file(FILE)
 if (not scan.id):
@@ -28,6 +29,7 @@ if (not scan.id):
     archive_id = path_parts[-2]
     scan_id = path_parts[-1].replace('.xml', '')
     scan.id = f"urn:golden-agents:{archive_id}:scan={scan_id}"
+scan.transkribus_uri="https://files.transkribus.eu/iiif/2/MOQMINPXXPUTISCRFIRKIOIX/full/max/0/default.jpg"
 
 
 def text_line_urn(archive_id: str, scan_id: str, textline_id: str):
@@ -38,9 +40,9 @@ def do_ner_on_line(text_line: PageXMLTextLine, model: VariantModel):
     return model.find_all_matches(text_line.text, SearchParameters(max_edit_distance=3, max_ngram=1))
 
 
-def create_web_annotation(scan_urn: str, text_line: PageXMLTextLine, ner_result):
+def create_web_annotation(scan_urn: str, text_line: PageXMLTextLine, ner_result, iiif_url, xywh):
     top_variant = ner_result['variants'][0]
-
+    versionId = str(uuid.uuid4())
     return {
         "@context": "http://www.w3.org/ns/anno.jsonld",
         "id": str(uuid.uuid4()),
@@ -48,17 +50,9 @@ def create_web_annotation(scan_urn: str, text_line: PageXMLTextLine, ner_result)
         "motivation": "classifying",
         "created": datetime.today().isoformat(),
         "generator": {
-            "id": "https://github.com/knaw-huc/golden-agents-tool",
+            "id": "https://github.com/knaw-huc/golden-agents-htr",
             "type": "Software",
             "name": "GoldenAgentsNER"
-        },
-        "target": {
-            "source": f'{scan_urn}:textline={text_line.id}',
-            "selector": {
-                "type": "TextPositionSelector",
-                "start": ner_result['offset']['begin'],
-                "end": ner_result['offset']['end']
-            }
         },
         "body": [
             {
@@ -74,7 +68,46 @@ def create_web_annotation(scan_urn: str, text_line: PageXMLTextLine, ner_result)
                     "match_score": top_variant['score'],
                     "category": ner_category[top_variant['lexicon']]
                 }
-            }]
+            }],
+        "target": [
+            {
+                "source": f'{scan_urn}:textline={text_line.id}',
+                "selector": {
+                    "type": "TextPositionSelector",
+                    "start": ner_result['offset']['begin'],
+                    "end": ner_result['offset']['end']
+                }
+            },
+            {
+                "source": f'{scan_urn}:textline={text_line.id}',
+                "selector": {
+                    "type": "FragmentSelector",
+                    "conformsTo": "http://tools.ietf.org/rfc/rfc5147",
+                    "value": f"char={ner_result['offset']['begin']},{ner_result['offset']['end']}"
+                }
+            },
+            {
+                "source": f'https://demorepo.tt.di.huc.knaw.nl/rest/versions/{versionId}/contents',
+                "type": "xml",
+                "selector": {
+                    "type": "FragmentSelector",
+                    "conformsTo": "http://tools.ietf.org/rfc/rfc3023",
+                    "value": f"xpointer(id({text_line.id})/TextEquiv/Unicode)"
+                }
+            },
+            {
+                "source": f"https://demorepo.tt.di.huc.knaw.nl/view/versions/{versionId}/chars/{ner_result['offset']['begin']}/{ner_result['offset']['end']}"
+            },
+            {
+                "source": iiif_url,
+                "type": "image",
+                "selector": {
+                    "type": "FragmentSelector",
+                    "conformsTo": "http://www.w3.org/TR/media-frags/",
+                    "value": f"xywh={xywh}"
+                }
+            }
+        ]
     }
 
 
@@ -85,6 +118,7 @@ for tl in [l for l in scan.get_lines() if l.text]:
             if (result['variants'][0]['score'] > 0.8):
                 print(tl.text)
                 print((result['input'], result['variants'][0]))
-                wa = create_web_annotation(scan.id, tl, result)
+                xywh = f"{tl.coords.x},{tl.coords.y},{tl.coords.w},{tl.coords.h}"
+                wa = create_web_annotation(scan.id, tl, result, iiif_url=scan.transkribus_uri, xywh=xywh)
                 print(json.dumps(wa, indent=4))
                 print()
