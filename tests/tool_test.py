@@ -1,15 +1,36 @@
+import json
+import random
 import unittest
 
 from icecream import ic
 
 from golden_agents.tools import read_werkvoorraad, extract_writer_index, extract_archive_index, DATA_DIR, scan_paths, \
-    transkribus_url, read_scan_data
+    transkribus_url, read_scan_data, get_xml_paths
 
 
-class ToolTestCase(unittest.TestCase):
+class ToolTestCase1(unittest.TestCase):
     def test_writers(self):
         write_writers_page()
         write_scan_pages()
+
+
+class ToolTestCase2(unittest.TestCase):
+    def test_textregion(self):
+        scan_data = read_scan_data()
+        wdl = read_werkvoorraad()
+        writer_idx = extract_writer_index(wdl)
+        with open('writer_idx.json', 'w') as f:
+            json.dump(writer_idx, f)
+        archive_idx = extract_archive_index(wdl)
+        with open('archive_idx.json', 'w') as f:
+            json.dump(archive_idx, f)
+        archives = list(archive_idx.values())
+        a = random.choice(archives)
+        scans_per_archive = get_xml_paths()
+        with open('scans_per_archive.json', 'w') as f:
+            json.dump(scans_per_archive, f)
+        scans = scans_per_archive[a.title]
+        ic(scans)
 
 
 def write_writers_page():

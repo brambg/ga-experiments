@@ -1,4 +1,5 @@
-#!/bin/env python
+#!/usr/bin/env python3
+
 import csv
 
 THESAURI_DIR = '../golden-agents-thesauri/'
