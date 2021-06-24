@@ -1,4 +1,3 @@
-# from analiticcl import VariantModel, Weights, SearchParameters
 from nltk import ngrams
 
 
@@ -9,10 +8,9 @@ class Corrector():
         self.max_ngram = max(k.count(' ') for k in corrections.keys()) + 1
 
     def correct(self, raw_str: str) -> str:
-        words = raw_str.split(' ')
-        corrected = ' '.join([self.corrections.get(o, o) for o in words])
-        for n in range(2, self.max_ngram + 1):
-            words = corrected.split(' ')
+        corrected = raw_str
+        for n in range(1, self.max_ngram + 1):
+            words = corrected.split(' ')  # TODO: check the words have not already been corrected?
             ngram_corrections = {}
             for i, t in enumerate(ngrams(words, n)):
                 orig = " ".join(t)

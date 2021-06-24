@@ -30,10 +30,10 @@ class CorrectorTestCase(unittest.TestCase):
         self.assertEqual(expected, c.correct(orig))
 
     def test_corrector_with_trigrams(self):
-        corrections = {'als me de': 'alsmede'}
+        corrections = {'amo': 'anno', 'als me de': 'alsmede'}
         c = Corrector(corrections)
-        orig = "proloog als me de epiloog"
-        expected = "proloog alsmede epiloog"
+        orig = "proloog als me de epiloog, amo 2021"
+        expected = "proloog alsmede epiloog, anno 2021"
         self.assertEqual(expected, c.correct(orig))
 
     def test_htr_corrections_1(self):
