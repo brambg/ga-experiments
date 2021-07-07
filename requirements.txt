@@ -1,5 +1,6 @@
-icecream
-dataclasses-json
 analiticcl
+dataclasses-json
+icecream
 nltk
 python-dateutil==2.8.1
+requests
