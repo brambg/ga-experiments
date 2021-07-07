@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import csv
+import re
 
 THESAURI_DIR = '../golden-agents-thesauri/'
 LOCATIONS_FILE = THESAURI_DIR + 'locations/observations.csv'
@@ -19,7 +20,7 @@ def extract_lexicon_from_csv(thesaurus_file: str, lexicon_file: str, column: str
         reader = csv.DictReader(f)
         data = [row for row in reader if row]
     print(f'  {len(data)} records read')
-    lexicon_items = sorted(list({d[column] for d in data if len(d[column]) > 0}), key=str.casefold)
+    lexicon_items = sorted(list({re.sub(r' +', ' ', d[column]) for d in data if len(d[column]) > 0}), key=str.casefold)
     print(f"> writing {len(lexicon_items)} unique lexicon terms to {lexicon_file}")
     with open(lexicon_file, 'w') as tsv:
         writer = csv.writer(tsv, delimiter='\t')
