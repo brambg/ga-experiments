@@ -2,7 +2,7 @@ import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
 from http import HTTPStatus
-from typing import List
+from typing import List, Dict
 
 import requests
 from dataclasses_json import dataclass_json, config
@@ -246,7 +246,7 @@ class TextRepoClient():
         response = requests.put(url=url, json={"name": name, "mimetype": mimetype})
         return self.__handle_response(response, {HTTPStatus.OK: to_file_type})
 
-    def delete_file_type(self, id: int):
+    def delete_file_type(self, id: int) -> bool:
         url = f'{self.base_uri}/rest/types/{id}'
         response = requests.delete(url=url)
         return self.__handle_response(response, {HTTPStatus.OK: lambda r: True})
@@ -274,6 +274,26 @@ class TextRepoClient():
         url = f'{self.base_uri}/task/index/type/{type_name}'
         response = requests.post(url=url)
         return self.__handle_response(response, {HTTPStatus.OK: lambda r: True})
+
+    def find_document_metadata(self, external_id: str) -> Dict[str, str]:
+        url = f'{self.base_uri}/task/find/{external_id}/document/metadata'
+        response = requests.get(url=url)
+        # ic(response.links)
+        return self.__handle_response(response, {HTTPStatus.OK: lambda r: r.json()})
+
+    def find_latest_file_contents(self, external_id: str, type_name: str) -> any:
+        url = f'{self.base_uri}/task/find/{external_id}/file/contents'
+        params = {'type': type_name}
+        response = requests.get(url=url, params=params)
+        # ic(response.links)
+        return self.__handle_response(response, {HTTPStatus.OK: lambda r: r.content})
+
+    def find_file_metadata(self, external_id: str, type_name: str) -> Dict[str, str]:
+        url = f'{self.base_uri}/task/find/{external_id}/file/metadata'
+        params = {'type': type_name}
+        response = requests.get(url=url, params=params)
+        # ic(response.links)
+        return self.__handle_response(response, {HTTPStatus.OK: lambda r: r.json()})
 
     def __handle_response(self, response: Response, result_producers: dict):
         if (response.status_code in result_producers.keys()):

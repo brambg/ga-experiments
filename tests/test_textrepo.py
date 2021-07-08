@@ -223,18 +223,25 @@ class CorrectedPageXMLTestCase(unittest.TestCase):
         archive = parts[-2]
         file = parts[-1]
         file_base = file.removesuffix('xml')
-        pageXmlId = get_pagexml_type_id(TR)
+        get_pagexml_type_id(TR)
         xml = correct_htr(filename)
-        ic(xml[0:500])
-        version_info = TR.import_version(external_id=f'golden_agents:{archive}:{file_base}', type_name='pagexml',
+        # ic(xml[0:500])
+        type_name = 'pagexml'
+        external_id = f'golden_agents:{archive}:{file_base}'
+        version_info = TR.import_version(external_id=external_id, type_name=type_name,
                                          contents=StringIO(xml), allow_new_document=True, as_latest_version=True)
-        # doc = TR.create_document(f'golden_agents:{archive}:{file_base}')
         ok = TR.set_document_metadata(version_info.documentId, 'project', 'Golden Agents')
         ok = TR.set_document_metadata(version_info.documentId, 'archive', archive)
         ok = TR.set_document_metadata(version_info.documentId, 'file', file)
-        # file = TR.create_document_file(doc, pageXmlId)
-        # version = TR.create_version(file, StringIO(xml))
-        # ic(version)
+
+        r = TR.find_document_metadata(external_id)
+        ic(r)
+
+        r = TR.find_latest_file_contents(external_id, type_name)
+        ic(r)
+
+        r = TR.find_file_metadata(external_id, type_name)
+        ic(r)
 
 
 if __name__ == '__main__':
