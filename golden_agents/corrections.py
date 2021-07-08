@@ -20,7 +20,7 @@ class Corrector():
                 corrected_terms = []
                 i = 0
                 while (i < len(words)):
-                    if (i in ngram_corrections):
+                    if i in ngram_corrections:
                         corrected_terms.append(ngram_corrections[i])
                         i += n
                     else:
