@@ -1,10 +1,13 @@
+import json
 import unittest
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from io import StringIO
 
+import lxml.etree
 from icecream import ic
 
+from golden_agents.corrections import Corrector
 from golden_agents.textrepo_client import TextRepoClient
 
 TR = TextRepoClient('http://localhost:8080/textrepo/')
@@ -39,12 +42,12 @@ class TextRepoTestCase(unittest.TestCase):
         self.assertEqual(201, documentsPage.page_offset)
 
     def test_read_documents_with_externalId(self):
-        documentsPage = TR.read_documents(externalId='ga:xyz')
+        documentsPage = TR.read_documents(external_id='ga:xyz')
         ic(documentsPage)
         self.assertIsNotNone(documentsPage)
 
-    def test_read_documents_createdAfter(self):
-        documentsPage = TR.read_documents(createdAfter=datetime.today())
+    def test_read_documents_created_after(self):
+        documentsPage = TR.read_documents(created_after=datetime.today())
         ic(documentsPage)
         self.assertIsNotNone(documentsPage)
         self.assertEqual(0, documentsPage.total)
@@ -76,29 +79,29 @@ class TextRepoTestCase(unittest.TestCase):
         self.purge_all_documents()
         self.purge_file_types()
 
-        externalId = f'ga:annotationId:{uuid.uuid4()}'
-        documentId = TR.create_document(externalId)
-        ic(documentId)
-        self.assertIsNotNone(documentId)
+        external_id = f'ga:annotationId:{uuid.uuid4()}'
+        document_id = TR.create_document(external_id)
+        ic(document_id)
+        self.assertIsNotNone(document_id)
 
-        readId = TR.read_document(documentId)
+        readId = TR.read_document(document_id)
         ic(readId)
-        self.assertEqual(documentId, readId)
+        self.assertEqual(document_id, readId)
 
-        files = TR.read_document_files(documentId)
+        files = TR.read_document_files(document_id)
         ic(files)
 
-        result = TR.set_document_metadata(documentId, "field", "value")
+        result = TR.set_document_metadata(document_id.id, "field", "value")
         ic(result)
 
-        metadata = TR.read_document_metadata(documentId)
+        metadata = TR.read_document_metadata(document_id)
         ic(metadata)
         self.assertEqual({"field": "value"}, metadata)
 
         xmlType = TR.create_file_type("xml", "text/xml")
         ic(xmlType)
 
-        fileId = TR.create_document_file(documentId, xmlType.id)
+        fileId = TR.create_document_file(document_id, xmlType.id)
         ic(fileId)
 
         ok = TR.set_file_metadata(fileId, "creator", "ga-ner-tool")
@@ -119,27 +122,38 @@ class TextRepoTestCase(unittest.TestCase):
         ok = TR.delete_file(fileId)
         assert (ok)
 
-        ok = TR.delete_document_metadata(documentId, "field")
+        ok = TR.delete_document_metadata(document_id, "field")
         assert (ok)
 
         ok = TR.delete_file_type(xmlType.id)
         assert (ok)
 
-        docId = TR.update_document_externalId(documentId, "new_external_id")
+        docId = TR.update_document_externalId(document_id, "new_external_id")
         ic(docId)
         self.assertEqual("new_external_id", docId.externalId)
 
         ok = TR.delete_document(readId)
         assert (ok)
 
-    def test_document_purge(self):
-        externalId = f'ga:annotationId:{uuid.uuid4()}'
-        documentId = TR.create_document(externalId)
-        ic(documentId)
-        self.assertIsNotNone(documentId)
+    def test_version_import(self):
+        external_id = f'ga:annotationId:{uuid.uuid4()}'
+        type_name = 'pagexml'
+        get_pagexml_type_id(TR)
+        contents = StringIO('<xml>Hello, World!</xml>')
+        version_info = TR.import_version(external_id=external_id, type_name=type_name, contents=contents,
+                                         allow_new_document=True, as_latest_version=True)
+        ic(version_info)
+        ok = TR.index_type(type_name)
+        assert ok
 
-        ok = TR.purge_document(externalId)
-        assert (ok)
+    def test_document_purge(self):
+        external_id = f'ga:annotationId:{uuid.uuid4()}'
+        document_id = TR.create_document(external_id)
+        ic(document_id)
+        self.assertIsNotNone(document_id)
+
+        ok = TR.purge_document(external_id)
+        assert ok
 
     def purge_file_types(self):
         if ('localhost' not in TR.base_uri):
@@ -160,6 +174,67 @@ class TextRepoTestCase(unittest.TestCase):
                     TR.purge_document(document.externalId)
                 except Exception:
                     print(f"{TR.base_uri}/rest/documents/{document.id}")
+
+
+def correct_htr(filename):
+    HTR_CORRECTIONS_FILE = '../data/htr_corrections.json'
+    with open(HTR_CORRECTIONS_FILE) as f:
+        corrections_json = f.read()
+    htr_corrector = Corrector(json.loads(corrections_json))
+    with open(filename) as f:
+        original_xml = f.read()
+    doc = lxml.etree.parse(filename).getroot()
+    corrections = {}
+    for element in doc.xpath("//pagexml:TextRegion/pagexml:TextLine/pagexml:TextEquiv/pagexml:Unicode",
+                             namespaces={
+                                 'pagexml': 'http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15'}):
+        original = element.text
+        if original:
+            corrected = htr_corrector.correct(original)
+            if (corrected != original):
+                corrections[original] = corrected
+    corrected_xml = original_xml
+    if (len(corrections) > 0):
+        original_last_change = doc.xpath("//pagexml:Metadata/pagexml:LastChange", namespaces={
+            'pagexml': 'http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15'})[0].text
+        new_last_change = datetime.now(timezone.utc).astimezone().isoformat(timespec='milliseconds')
+        corrections[
+            f'<LastChange>{original_last_change}</LastChange>'] = f'<LastChange>{new_last_change}</LastChange>'
+        for o, c in corrections.items():
+            corrected_xml = corrected_xml.replace(o, c)
+    return corrected_xml
+
+
+def get_pagexml_type_id(textrepo: TextRepoClient) -> int:
+    existing_types = textrepo.read_file_types()
+    type_id_index = {t.name: t.id for t in existing_types}
+    pagexml = 'pagexml'
+    if pagexml not in type_id_index.keys():
+        type = textrepo.create_file_type(pagexml, 'application/vnd.prima.page+xml')
+        return type.id
+    else:
+        return type_id_index[pagexml]
+
+
+class CorrectedPageXMLTestCase(unittest.TestCase):
+    def test_upload_to_textrepo(self):
+        filename = '../../pagexml/2417_NOTD00273/NOTD00273000216.xml'
+        parts = filename.split('/')
+        archive = parts[-2]
+        file = parts[-1]
+        file_base = file.removesuffix('xml')
+        pageXmlId = get_pagexml_type_id(TR)
+        xml = correct_htr(filename)
+        ic(xml[0:500])
+        version_info = TR.import_version(external_id=f'golden_agents:{archive}:{file_base}', type_name='pagexml',
+                                         contents=StringIO(xml), allow_new_document=True, as_latest_version=True)
+        # doc = TR.create_document(f'golden_agents:{archive}:{file_base}')
+        ok = TR.set_document_metadata(version_info.documentId, 'project', 'Golden Agents')
+        ok = TR.set_document_metadata(version_info.documentId, 'archive', archive)
+        ok = TR.set_document_metadata(version_info.documentId, 'file', file)
+        # file = TR.create_document_file(doc, pageXmlId)
+        # version = TR.create_version(file, StringIO(xml))
+        # ic(version)
 
 
 if __name__ == '__main__':
