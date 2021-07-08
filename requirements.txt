@@ -1,6 +1,8 @@
 analiticcl
 dataclasses-json
 icecream
+lxml
 nltk
+pagexml
 python-dateutil==2.8.1
 requests
