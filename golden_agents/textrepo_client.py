@@ -157,8 +157,8 @@ class TextRepoClient():
         response = requests.post(url=url, json={'docId': document_identifier.id, 'typeId': typeId})
         return self.__handle_response(response, {HTTPStatus.CREATED: to_file_identifier})
 
-    def read_file(self, file_identifier: FileIdentifier) -> FileIdentifier:
-        url = f'{self.base_uri}/rest/files/{file_identifier.id}'
+    def read_file(self, file_id: uuid) -> FileIdentifier:
+        url = f'{self.base_uri}/rest/files/{file_id}'
         response = requests.get(url=url)
         return self.__handle_response(response, {HTTPStatus.OK: to_file_identifier})
 
@@ -167,8 +167,8 @@ class TextRepoClient():
         response = requests.put(url=url, data={'docId': document_identifier.id, 'typeId': typeId})
         return self.__handle_response(response, {HTTPStatus.OK: to_file_identifier})
 
-    def delete_file(self, file_identifier: FileIdentifier) -> bool:
-        url = f'{self.base_uri}/rest/files/{file_identifier.id}'
+    def delete_file(self, file_id: uuid) -> bool:
+        url = f'{self.base_uri}/rest/files/{file_id}'
         response = requests.delete(url=url)
         return self.__handle_response(response, {HTTPStatus.OK: lambda r: True})
 
@@ -183,30 +183,30 @@ class TextRepoClient():
         response = requests.get(url=url, params=params)
         return self.__handle_response(response, {HTTPStatus.OK: lambda r: r.json()})
 
-    def read_file_metadata(self, file_identifier: FileIdentifier) -> dict:
-        url = f'{self.base_uri}/rest/files/{file_identifier.id}/metadata'
+    def read_file_metadata(self, file_id: uuid) -> dict:
+        url = f'{self.base_uri}/rest/files/{file_id}/metadata'
         response = requests.get(url=url)
         return self.__handle_response(response, {HTTPStatus.OK: lambda r: r.json()})
 
-    def set_file_metadata(self, file_identifier: FileIdentifier, key: str, value: str) -> bool:
+    def set_file_metadata(self, file_id: uuid, key: str, value: str) -> bool:
         """Create or update file metadata entry"""
-        url = f'{self.base_uri}/rest/files/{file_identifier.id}/metadata/{key}'
+        url = f'{self.base_uri}/rest/files/{file_id}/metadata/{key}'
         response = requests.put(url=url, data=value)
         return self.__handle_response(response, {HTTPStatus.OK: lambda r: True})
 
-    def delete_file_metadata(self, file_identifier: FileIdentifier, key: str) -> bool:
+    def delete_file_metadata(self, file_id: uuid, key: str) -> bool:
         """Delete file metadata entry"""
-        url = f'{self.base_uri}/rest/files/{file_identifier.id}/metadata/{key}'
+        url = f'{self.base_uri}/rest/files/{file_id}/metadata/{key}'
         response = requests.delete(url=url)
         return self.__handle_response(response, {HTTPStatus.OK: lambda r: True})
 
     def read_file_versions(self,
-                           file_identifier: FileIdentifier,
+                           file_id: uuid,
                            limit: int = None,
                            offset: int = None,
                            created_after: datetime = None
                            ) -> List[FileIdentifier]:
-        url = f'{self.base_uri}/rest/files/{file_identifier.id}/versions'
+        url = f'{self.base_uri}/rest/files/{file_id}/versions'
         params = {}
         if (created_after):
             params['createdAfter'] = created_after.isoformat(timespec='seconds')
@@ -219,12 +219,18 @@ class TextRepoClient():
                                       {HTTPStatus.OK: lambda r: [VersionIdentifier.from_dict(d) for d in
                                                                  r.json()["items"]]})
 
-    def create_version(self, file_identifier: FileIdentifier, file) -> VersionIdentifier:
+    def create_version(self, file_id: uuid, file) -> VersionIdentifier:
         url = f'{self.base_uri}/rest/versions'
         files = {'contents': file}
-        data = {'fileId': file_identifier.id}
+        data = {'fileId': file_id}
         response = requests.post(url=url, files=files, data=data)
         return self.__handle_response(response, {HTTPStatus.CREATED: to_version_identifier})
+
+    def set_version_metadata(self, version_id: uuid, key: str, value: str) -> bool:
+        """Create or update version metadata entry"""
+        url = f'{self.base_uri}/rest/versions/{version_id}/metadata/{key}'
+        response = requests.put(url=url, data=value)
+        return self.__handle_response(response, {HTTPStatus.OK: lambda r: True})
 
     def read_file_types(self) -> List[FileType]:
         url = f'{self.base_uri}/rest/types'

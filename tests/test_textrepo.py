@@ -1,13 +1,15 @@
-import json
+import random
+import time
 import unittest
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime
 from io import StringIO
+from multiprocessing import Pool
+from typing import List
 
-import lxml.etree
 from icecream import ic
 
-from golden_agents.corrections import Corrector
+from golden_agents.pagexml_uploader import PageXMLUploader
 from golden_agents.textrepo_client import TextRepoClient
 
 TR = TextRepoClient('http://localhost:8080/textrepo/')
@@ -53,7 +55,7 @@ class TextRepoTestCase(unittest.TestCase):
         self.assertEqual(0, documentsPage.total)
 
     def test_file_type_crud(self):
-        self.purge_file_types()
+        purge_file_types()
 
         type = TR.create_file_type("httml", "application/text+html")
         ic(type)
@@ -76,8 +78,8 @@ class TextRepoTestCase(unittest.TestCase):
         self.assertEqual(0, len(types))
 
     def test_document_crud(self):
-        self.purge_all_documents()
-        self.purge_file_types()
+        purge_all_documents()
+        purge_file_types()
 
         external_id = f'ga:annotationId:{uuid.uuid4()}'
         document_id = TR.create_document(external_id)
@@ -104,22 +106,22 @@ class TextRepoTestCase(unittest.TestCase):
         fileId = TR.create_document_file(document_id, xmlType.id)
         ic(fileId)
 
-        ok = TR.set_file_metadata(fileId, "creator", "ga-ner-tool")
+        ok = TR.set_file_metadata(fileId.id, "creator", "ga-ner-tool")
         assert (ok)
 
-        metadata = TR.read_file_metadata(fileId)
+        metadata = TR.read_file_metadata(fileId.id)
         ic(metadata)
         self.assertEqual("ga-ner-tool", metadata["creator"])
 
-        versions = TR.read_file_versions(fileId)
+        versions = TR.read_file_versions(fileId.id)
         ic(versions)
 
         file = StringIO('<xml>the contents of this version<</xml>')
         ic(type(file))
-        versionId = TR.create_version(fileId, file)
+        versionId = TR.create_version(fileId.id, file)
         ic(versionId)
 
-        ok = TR.delete_file(fileId)
+        ok = TR.delete_file(fileId.id)
         assert (ok)
 
         ok = TR.delete_document_metadata(document_id, "field")
@@ -135,17 +137,6 @@ class TextRepoTestCase(unittest.TestCase):
         ok = TR.delete_document(readId)
         assert (ok)
 
-    def test_version_import(self):
-        external_id = f'ga:annotationId:{uuid.uuid4()}'
-        type_name = 'pagexml'
-        get_pagexml_type_id(TR)
-        contents = StringIO('<xml>Hello, World!</xml>')
-        version_info = TR.import_version(external_id=external_id, type_name=type_name, contents=contents,
-                                         allow_new_document=True, as_latest_version=True)
-        ic(version_info)
-        ok = TR.index_type(type_name)
-        assert ok
-
     def test_document_purge(self):
         external_id = f'ga:annotationId:{uuid.uuid4()}'
         document_id = TR.create_document(external_id)
@@ -155,93 +146,70 @@ class TextRepoTestCase(unittest.TestCase):
         ok = TR.purge_document(external_id)
         assert ok
 
-    def purge_file_types(self):
-        if ('localhost' not in TR.base_uri):
-            print("no purging on external textrepo's!!")
-            exit(-1)
-        else:
-            for type in TR.read_file_types():
-                TR.delete_file_type(type.id)
 
-    def purge_all_documents(self):
-        if ('localhost' not in TR.base_uri):
-            print("no purging on external textrepo's!!")
-            exit(-1)
-        else:
-            docPage = TR.read_documents()
-            for document in docPage.items:
-                try:
-                    TR.purge_document(document.externalId)
-                except Exception:
-                    print(f"{TR.base_uri}/rest/documents/{document.id}")
-
-
-def correct_htr(filename):
-    HTR_CORRECTIONS_FILE = '../data/htr_corrections.json'
-    with open(HTR_CORRECTIONS_FILE) as f:
-        corrections_json = f.read()
-    htr_corrector = Corrector(json.loads(corrections_json))
-    with open(filename) as f:
-        original_xml = f.read()
-    doc = lxml.etree.parse(filename).getroot()
-    corrections = {}
-    for element in doc.xpath("//pagexml:TextRegion/pagexml:TextLine/pagexml:TextEquiv/pagexml:Unicode",
-                             namespaces={
-                                 'pagexml': 'http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15'}):
-        original = element.text
-        if original:
-            corrected = htr_corrector.correct(original)
-            if (corrected != original):
-                corrections[original] = corrected
-    corrected_xml = original_xml
-    if (len(corrections) > 0):
-        original_last_change = doc.xpath("//pagexml:Metadata/pagexml:LastChange", namespaces={
-            'pagexml': 'http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15'})[0].text
-        new_last_change = datetime.now(timezone.utc).astimezone().isoformat(timespec='milliseconds')
-        corrections[
-            f'<LastChange>{original_last_change}</LastChange>'] = f'<LastChange>{new_last_change}</LastChange>'
-        for o, c in corrections.items():
-            corrected_xml = corrected_xml.replace(o, c)
-    return corrected_xml
-
-
-def get_pagexml_type_id(textrepo: TextRepoClient) -> int:
-    existing_types = textrepo.read_file_types()
-    type_id_index = {t.name: t.id for t in existing_types}
-    pagexml = 'pagexml'
-    if pagexml not in type_id_index.keys():
-        type = textrepo.create_file_type(pagexml, 'application/vnd.prima.page+xml')
-        return type.id
-    else:
-        return type_id_index[pagexml]
-
-
-class CorrectedPageXMLTestCase(unittest.TestCase):
+class PageXMLUploaderTestCase(unittest.TestCase):
     def test_upload_to_textrepo(self):
-        filename = '../../pagexml/2417_NOTD00273/NOTD00273000216.xml'
-        parts = filename.split('/')
-        archive = parts[-2]
-        file = parts[-1]
-        file_base = file.removesuffix('xml')
-        get_pagexml_type_id(TR)
-        xml = correct_htr(filename)
-        # ic(xml[0:500])
-        type_name = 'pagexml'
-        external_id = f'golden_agents:{archive}:{file_base}'
-        version_info = TR.import_version(external_id=external_id, type_name=type_name,
-                                         contents=StringIO(xml), allow_new_document=True, as_latest_version=True)
-        ok = TR.set_document_metadata(version_info.documentId, 'project', 'Golden Agents')
-        ok = TR.set_document_metadata(version_info.documentId, 'archive', archive)
-        ok = TR.set_document_metadata(version_info.documentId, 'file', file)
+        uploader = PageXMLUploader(TR, '../../pagexml')
+        paths = all_page_xml_file_paths()
+        random_path = random.choice(paths)
+        upload_info = uploader.upload(random_path)
+        ic(upload_info)
 
-        r = TR.find_document_metadata(external_id)
-        ic(r)
 
-        r = TR.find_latest_file_contents(external_id, type_name)
-        ic(r)
+class UploadAllPageXMLTestCase(unittest.TestCase):
+    def test_upload_all_to_textrepo(self):
+        print("purging all documents...")
+        startTime = time.time()
+        purge_all_documents()
+        print(f'  done in {round(time.time() - startTime)} seconds')
 
-        r = TR.find_file_metadata(external_id, type_name)
-        ic(r)
+        uploader = PageXMLUploader(TR, '../../pagexml')
+        paths = all_page_xml_file_paths()
+        print(f"uploading {len(paths)} documents...")
+        startTime = time.time()
+        with Pool(5) as p:
+            p.map(uploader.upload, paths)
+        # for path in paths:
+        #     upload_info = uploader.upload(path)
+        print(f'  done in {round(time.time() - startTime)} seconds')
+
+        print("indexing the documents...")
+        startTime = time.time()
+        TR.index_type('pagexml')
+        print(f'  done in {round(time.time() - startTime)} seconds')
+
+
+def all_page_xml_file_paths() -> List[str]:
+    with open('../data/all-pagexml.lst') as f:
+        paths = f.readlines()
+    return [p.strip() for p in paths]
+
+
+def purge_file_types():
+    if ('localhost' not in TR.base_uri):
+        print("no purging on external textrepo's!!")
+        exit(-1)
+    else:
+        for type in TR.read_file_types():
+            TR.delete_file_type(type.id)
+
+
+def purge_all_documents():
+    if ('localhost' not in TR.base_uri):
+        print("no purging on external textrepo's!!")
+        exit(-1)
+    else:
+        docPage = TR.read_documents()
+        total = docPage.total
+        docPage = TR.read_documents(limit=total)
+        with Pool(5) as p:
+            p.map(TR.purge_document, [document.externalId for document in docPage.items])
+
+        # for document in docPage.items:
+        #     try:
+        #         TR.purge_document(document.externalId)
+        #     except Exception:
+        #         print(f"{TR.base_uri}/rest/documents/{document.id}")
 
 
 if __name__ == '__main__':
