@@ -24,7 +24,7 @@ FILE = '../../pagexml/2408_A16098/a16098000013.xml'
 
 
 scan = parse_pagexml_file(FILE)
-if (not scan.id):
+if not scan.id:
     path_parts = FILE.split('/')
     archive_id = path_parts[-2]
     scan_id = path_parts[-1].replace('.xml', '')
@@ -115,7 +115,7 @@ for tl in [l for l in scan.get_lines() if l.text]:
     ner_results = do_ner_on_line(tl, model)
     for result in ner_results:
         if len(result['variants']) > 0:
-            if (result['variants'][0]['score'] > 0.8):
+            if result['variants'][0]['score'] > 0.8:
                 print(tl.text)
                 print((result['input'], result['variants'][0]))
                 xywh = f"{tl.coords.x},{tl.coords.y},{tl.coords.w},{tl.coords.h}"

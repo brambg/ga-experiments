@@ -107,7 +107,7 @@ class TextRepoTestCase(unittest.TestCase):
         ic(fileId)
 
         ok = TR.set_file_metadata(fileId.id, "creator", "ga-ner-tool")
-        assert (ok)
+        assert ok
 
         metadata = TR.read_file_metadata(fileId.id)
         ic(metadata)
@@ -122,20 +122,20 @@ class TextRepoTestCase(unittest.TestCase):
         ic(versionId)
 
         ok = TR.delete_file(fileId.id)
-        assert (ok)
+        assert ok
 
         ok = TR.delete_document_metadata(document_id, "field")
-        assert (ok)
+        assert ok
 
         ok = TR.delete_file_type(xmlType.id)
-        assert (ok)
+        assert ok
 
         docId = TR.update_document_externalId(document_id, "new_external_id")
         ic(docId)
         self.assertEqual("new_external_id", docId.externalId)
 
         ok = TR.delete_document(readId)
-        assert (ok)
+        assert ok
 
     def test_document_purge(self):
         external_id = f'ga:annotationId:{uuid.uuid4()}'
@@ -179,6 +179,23 @@ class UploadAllPageXMLTestCase(unittest.TestCase):
         print(f'  done in {round(time.time() - startTime)} seconds')
 
 
+class Upload2408PageXMLTestCase(unittest.TestCase):
+    def test_upload_some_to_textrepo(self):
+        uploader = PageXMLUploader(TR, '../../pagexml')
+        paths = [p for p in all_page_xml_file_paths() if '2408' in p]
+        print(f"uploading {len(paths)} documents...")
+        startTime = time.time()
+        with Pool(5) as p:
+            p.map(uploader.upload, paths)
+        # for path in paths:
+        #     upload_info = uploader.upload(path)
+        print(f'  done in {round(time.time() - startTime)} seconds')
+
+        print("indexing the documents...")
+        startTime = time.time()
+        TR.index_type('pagexml')
+        print(f'  done in {round(time.time() - startTime)} seconds')
+
 def all_page_xml_file_paths() -> List[str]:
     with open('../data/all-pagexml.lst') as f:
         paths = f.readlines()
@@ -186,7 +203,7 @@ def all_page_xml_file_paths() -> List[str]:
 
 
 def purge_file_types():
-    if ('localhost' not in TR.base_uri):
+    if 'localhost' not in TR.base_uri:
         print("no purging on external textrepo's!!")
         exit(-1)
     else:
@@ -195,7 +212,7 @@ def purge_file_types():
 
 
 def purge_all_documents():
-    if ('localhost' not in TR.base_uri):
+    if 'localhost' not in TR.base_uri:
         print("no purging on external textrepo's!!")
         exit(-1)
     else:

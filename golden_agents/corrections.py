@@ -1,7 +1,7 @@
 from nltk import ngrams
 
 
-class Corrector():
+class Corrector:
 
     def __init__(self, corrections: dict):
         self.corrections = corrections
@@ -14,12 +14,12 @@ class Corrector():
             ngram_corrections = {}
             for i, t in enumerate(ngrams(words, n)):
                 orig = " ".join(t)
-                if (orig in self.corrections):
+                if orig in self.corrections:
                     ngram_corrections[i] = self.corrections[orig]
-            if (len(ngram_corrections) > 0):
+            if len(ngram_corrections) > 0:
                 corrected_terms = []
                 i = 0
-                while (i < len(words)):
+                while i < len(words):
                     if i in ngram_corrections:
                         corrected_terms.append(ngram_corrections[i])
                         i += n

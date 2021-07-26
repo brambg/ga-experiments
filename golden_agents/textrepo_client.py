@@ -66,14 +66,14 @@ class FileType:
     mimetype: str
 
 
-class TextRepoClient():
+class TextRepoClient:
 
     def __init__(self, base_uri: str):
         self.base_uri = base_uri.strip('/')
         self.raise_exception = True
 
     def __str__(self):
-        return (f"TextRepoClient({self.base_uri})")
+        return f"TextRepoClient({self.base_uri})"
 
     def __repr__(self):
         return self.__str__()
@@ -91,13 +91,13 @@ class TextRepoClient():
                        ) -> DocumentsPage:
         url = f'{self.base_uri}/rest/documents'
         params = {}
-        if (external_id):
+        if external_id:
             params['externalId'] = external_id
-        if (created_after):
+        if created_after:
             params['createdAfter'] = created_after.isoformat(timespec='seconds')
-        if (limit):
+        if limit:
             params['limit'] = limit
-        if (offset):
+        if offset:
             params['offset'] = offset
         response = requests.get(url=url, params=params)
         return self.__handle_response(response, {HTTPStatus.OK: to_documents_page})
@@ -176,9 +176,9 @@ class TextRepoClient():
                             offset: int = None) -> dict:
         url = f'{self.base_uri}/rest/documents/{document_identifier.id}/files'
         params = {}
-        if (limit):
+        if limit:
             params['limit'] = limit
-        if (offset):
+        if offset:
             params['offset'] = offset
         response = requests.get(url=url, params=params)
         return self.__handle_response(response, {HTTPStatus.OK: lambda r: r.json()})
@@ -208,11 +208,11 @@ class TextRepoClient():
                            ) -> List[FileIdentifier]:
         url = f'{self.base_uri}/rest/files/{file_id}/versions'
         params = {}
-        if (created_after):
+        if created_after:
             params['createdAfter'] = created_after.isoformat(timespec='seconds')
-        if (limit):
+        if limit:
             params['limit'] = limit
-        if (offset):
+        if offset:
             params['offset'] = offset
         response = requests.get(url=url, params=params)
         return self.__handle_response(response,
@@ -302,7 +302,8 @@ class TextRepoClient():
         return self.__handle_response(response, {HTTPStatus.OK: lambda r: r.json()})
 
     def __handle_response(self, response: Response, result_producers: dict):
-        if (response.status_code in result_producers.keys()):
+        print(f'-> {response.request.method} {response.request.url}')
+        if response.status_code in result_producers.keys():
             result = result_producers[response.status_code](response)
             # if (self.raise_exceptions):
             return result
