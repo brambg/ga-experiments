@@ -7,13 +7,14 @@ import lxml.etree
 
 from golden_agents.corrections import Corrector
 from golden_agents.textrepo_client import TextRepoClient
-from golden_agents.tools import read_werkvoorraad
+from golden_agents.tools import read_werkvoorraad, read_scan_tags
 
 
-class PageXMLUploader():
+class PageXMLUploader:
     def __init__(self, text_repo_client: TextRepoClient, pagexml_base_path: str):
         # scandata = read_scan_data()
         werkvoorraad = read_werkvoorraad()
+        self.scan_tags = read_scan_tags()
         self.wv_idx = {wv.title: wv for wv in werkvoorraad}
         self.tr = text_repo_client
         self.pagexml_base_path = pagexml_base_path
@@ -23,35 +24,42 @@ class PageXMLUploader():
         parts = filename.split('/')
         archive = parts[-2]
         file = parts[-1]
-        file_base = file.removesuffix('.xml')
+        scan_name = file.removesuffix('.xml')
         tr = self.tr
         get_pagexml_type_id(tr)
         (corrected, xml) = correct_htr(filename)
         type_name = 'pagexml'
-        external_id = f'golden_agents:{archive}:{file_base}'
+        external_id = f'golden_agents:{archive}:{scan_name}'
         version_info = tr.import_version(external_id=external_id, type_name=type_name,
-                                         contents=StringIO(xml), allow_new_document=True, as_latest_version=True)
-        ok = tr.set_document_metadata(version_info.documentId, 'project', 'Golden Agents')
-        ok = tr.set_document_metadata(version_info.documentId, 'archive', archive)
-        ok = tr.set_document_metadata(version_info.documentId, 'file', file)
+                                         contents=StringIO(xml), allow_new_document=False, as_latest_version=True)
+        document_id = version_info.documentId
+        file_id = version_info.fileId
+        version_id = version_info.versionId
+        ok = tr.set_document_metadata(document_id, 'project', 'Golden Agents')
+        ok = tr.set_document_metadata(document_id, 'archive', archive)
+        ok = tr.set_document_metadata(document_id, 'file', file)
         archive_data = self.wv_idx.get(archive)
         if archive_data:
-            ok = tr.set_document_metadata(version_info.documentId, 'writer', archive_data.writer)
-            ok = tr.set_document_metadata(version_info.documentId, 'status', archive_data.status)
-        ok = tr.set_file_metadata(version_info.fileId, 'filename', file)
-        ok = tr.set_version_metadata(version_info.versionId, 'corrected', str(corrected))
+            ok = tr.set_document_metadata(document_id, 'writer', archive_data.writer)
+            ok = tr.set_document_metadata(document_id, 'status', archive_data.status)
+        ok = tr.set_file_metadata(file_id, 'filename', file)
+        ok = tr.set_version_metadata(version_id, 'corrected', str(corrected))
+        tags = self.scan_tags.get(scan_name)
+        if tags:
+            for tag in tags:
+                ok = tr.set_document_metadata(document_id, f'tag_{tag}', 'True')
         base_uri = tr.base_uri
         upload_info = {
             'external_id': external_id,
-            'document': f'{base_uri}/rest/documents/{version_info.documentId}',
-            'document_metadata': f'{base_uri}/rest/documents/{version_info.documentId}/metadata',
-            'document_files': f'{base_uri}/rest/documents/{version_info.documentId}/files',
-            'file': f'{base_uri}/rest/files/{version_info.fileId}',
-            'file_metadata': f'{base_uri}/rest/files/{version_info.fileId}/metadata',
-            'file_versions': f'{base_uri}/rest/files/{version_info.fileId}/versions',
-            'version': f'{base_uri}/rest/versions/{version_info.versionId}',
-            'version_metadata': f'{base_uri}/rest/versions/{version_info.versionId}/metadata',
-            'version_contents': f'{base_uri}/rest/versions/{version_info.versionId}/contents'
+            'document': f'{base_uri}/rest/documents/{document_id}',
+            'document_metadata': f'{base_uri}/rest/documents/{document_id}/metadata',
+            'document_files': f'{base_uri}/rest/documents/{document_id}/files',
+            'file': f'{base_uri}/rest/files/{file_id}',
+            'file_metadata': f'{base_uri}/rest/files/{file_id}/metadata',
+            'file_versions': f'{base_uri}/rest/files/{file_id}/versions',
+            'version': f'{base_uri}/rest/versions/{version_id}',
+            'version_metadata': f'{base_uri}/rest/versions/{version_id}/metadata',
+            'version_contents': f'{base_uri}/rest/versions/{version_id}/contents'
         }
         return upload_info
 
@@ -82,11 +90,11 @@ def correct_htr(filename):
         original = element.text
         if original:
             corrected = htr_corrector.correct(original)
-            if (corrected != original):
+            if corrected != original:
                 corrections[original] = corrected
     corrected_xml = original_xml
     corrected = False
-    if (len(corrections) > 0):
+    if len(corrections) > 0:
         corrected = True
         original_last_change = doc.xpath("//pagexml:Metadata/pagexml:LastChange", namespaces={
             'pagexml': 'http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15'})[0].text
@@ -95,4 +103,4 @@ def correct_htr(filename):
             f'<LastChange>{original_last_change}</LastChange>'] = f'<LastChange>{new_last_change}</LastChange>'
         for o, c in corrections.items():
             corrected_xml = corrected_xml.replace(o, c)
-    return (corrected, corrected_xml)
+    return corrected, corrected_xml
