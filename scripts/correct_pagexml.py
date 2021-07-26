@@ -31,12 +31,12 @@ for filename in args.files:
         original = element.text
         if original:
             corrected = htr_corrector.correct(original)
-            if (corrected != original):
+            if corrected != original:
                 corrections[original] = corrected
                 print(f'original:  {original}')
                 print(f'corrected: {corrected}')
                 print()
-    if (len(corrections) > 0):
+    if len(corrections) > 0:
         corrected_xml = original_xml
         original_last_change = doc.xpath("//pagexml:Metadata/pagexml:LastChange", namespaces={
             'pagexml': 'http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15'})[0].text
