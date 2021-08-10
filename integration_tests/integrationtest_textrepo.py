@@ -5,14 +5,13 @@ import uuid
 from datetime import datetime
 from io import StringIO
 from multiprocessing import Pool
-from typing import List
 
 from icecream import ic
 
 from golden_agents.pagexml_uploader import PageXMLUploader
 from golden_agents.textrepo_client import TextRepoClient
 
-TR = TextRepoClient('http://localhost:8080/textrepo/')
+TR = TextRepoClient(base_uri='http://localhost:8080/textrepo/', verbose=True)
 
 
 class TextRepoTestCase(unittest.TestCase):
@@ -196,10 +195,6 @@ class Upload2408PageXMLTestCase(unittest.TestCase):
         TR.index_type('pagexml')
         print(f'  done in {round(time.time() - startTime)} seconds')
 
-def all_page_xml_file_paths() -> List[str]:
-    with open('../data/all-pagexml.lst') as f:
-        paths = f.readlines()
-    return [p.strip() for p in paths]
 
 
 def purge_file_types():

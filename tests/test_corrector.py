@@ -3,7 +3,7 @@ import unittest
 
 from golden_agents.corrections import Corrector
 
-HTR_CORRECTIONS_FILE = '../data/htr_corrections.json'
+HTR_CORRECTIONS_FILE = 'data/htr_corrections.json'
 
 with open(HTR_CORRECTIONS_FILE) as f:
     corrections_json = f.read()
