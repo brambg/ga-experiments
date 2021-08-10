@@ -18,6 +18,11 @@ class PageXMLUploader:
         self.wv_idx = {wv.title: wv for wv in werkvoorraad}
         self.tr = text_repo_client
         self.pagexml_base_path = pagexml_base_path
+        get_pagexml_type_id(text_repo_client)
+        HTR_CORRECTIONS_FILE = '../data/htr_corrections.json'
+        with open(HTR_CORRECTIONS_FILE) as f:
+            corrections_json = f.read()
+        self.htr_corrector = Corrector(json.loads(corrections_json))
 
     def upload(self, file_path: str) -> Dict[str, str]:
         filename = f'{self.pagexml_base_path}/{file_path}'
@@ -26,12 +31,11 @@ class PageXMLUploader:
         file = parts[-1]
         scan_name = file.removesuffix('.xml')
         tr = self.tr
-        get_pagexml_type_id(tr)
-        (corrected, xml) = correct_htr(filename)
+        (corrected, xml) = correct_htr(self.htr_corrector, filename)
         type_name = 'pagexml'
         external_id = f'golden_agents:{archive}:{scan_name}'
         version_info = tr.import_version(external_id=external_id, type_name=type_name,
-                                         contents=StringIO(xml), allow_new_document=False, as_latest_version=True)
+                                         contents=StringIO(xml), allow_new_document=True, as_latest_version=True)
         document_id = version_info.documentId
         file_id = version_info.fileId
         version_id = version_info.versionId
@@ -75,11 +79,7 @@ def get_pagexml_type_id(textrepo: TextRepoClient) -> int:
         return type_id_index[pagexml]
 
 
-def correct_htr(filename):
-    HTR_CORRECTIONS_FILE = '../data/htr_corrections.json'
-    with open(HTR_CORRECTIONS_FILE) as f:
-        corrections_json = f.read()
-    htr_corrector = Corrector(json.loads(corrections_json))
+def correct_htr(htr_corrector: Corrector, filename: str):
     with open(filename) as f:
         original_xml = f.read()
     doc = lxml.etree.parse(filename).getroot()
@@ -93,14 +93,13 @@ def correct_htr(filename):
             if corrected != original:
                 corrections[original] = corrected
     corrected_xml = original_xml
-    corrected = False
+    is_corrected = False
     if len(corrections) > 0:
-        corrected = True
+        is_corrected = True
         original_last_change = doc.xpath("//pagexml:Metadata/pagexml:LastChange", namespaces={
             'pagexml': 'http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15'})[0].text
         new_last_change = datetime.now(timezone.utc).astimezone().isoformat(timespec='milliseconds')
-        corrections[
-            f'<LastChange>{original_last_change}</LastChange>'] = f'<LastChange>{new_last_change}</LastChange>'
+        corrections[f'<LastChange>{original_last_change}</LastChange>'] = f'<LastChange>{new_last_change}</LastChange>'
         for o, c in corrections.items():
             corrected_xml = corrected_xml.replace(o, c)
-    return corrected, corrected_xml
+    return is_corrected, corrected_xml
