@@ -1,8 +1,12 @@
 analiticcl
 dataclasses-json
+elucidate_client
 icecream
 lxml
 nltk
+numpy
+scipy
 pagexml
 python-dateutil==2.8.1
 requests
+xmltodict
