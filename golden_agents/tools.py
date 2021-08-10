@@ -2,13 +2,14 @@ import csv
 import glob
 import json
 from dataclasses import dataclass
+from typing import List
 
 from dataclasses_json import dataclass_json
 
-DATA_DIR = '../../pagexml'
-SCANS_FILE = '../data/scans_20210403.csv'
-INVENTORY_FILE = '../data/werkvoorraad.csv'
-TAGS_FILE = '../data/scan_tags.json'
+DATA_DIR = '../pagexml'
+SCANS_FILE = 'data/scans_20210403.csv'
+INVENTORY_FILE = 'data/werkvoorraad.csv'
+TAGS_FILE = 'data/scan_tags.json'
 
 
 @dataclass_json
@@ -74,6 +75,7 @@ def read_scan_tags():
     with open(TAGS_FILE) as f:
         return json.load(f)
 
+
 def extract_writer_index(work_data_list):
     return {t[0]: Writer(*t) for t in set([(wd.rubric, wd.writer) for wd in work_data_list])}
 
@@ -98,3 +100,9 @@ def get_xml_paths():
 
 def file_url(scan_path: str):
     return f'file:///C:/workspaces/golden-agents/pagexml{scan_path.replace(DATA_DIR, "")}'
+
+
+def all_page_xml_file_paths() -> List[str]:
+    with open('data/all-pagexml.lst') as f:
+        paths = f.readlines()
+    return [p.strip() for p in paths]
