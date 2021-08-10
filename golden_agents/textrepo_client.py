@@ -68,9 +68,10 @@ class FileType:
 
 class TextRepoClient:
 
-    def __init__(self, base_uri: str):
+    def __init__(self, base_uri: str, verbose: bool = False):
         self.base_uri = base_uri.strip('/')
         self.raise_exception = True
+        self.verbose = verbose
 
     def __str__(self):
         return f"TextRepoClient({self.base_uri})"
@@ -302,7 +303,9 @@ class TextRepoClient:
         return self.__handle_response(response, {HTTPStatus.OK: lambda r: r.json()})
 
     def __handle_response(self, response: Response, result_producers: dict):
-        print(f'-> {response.request.method} {response.request.url}')
+        if (self.verbose):
+            print(f'-> {response.request.method} {response.request.url}')
+            print(f'<- {response.status_code}')
         if response.status_code in result_producers.keys():
             result = result_producers[response.status_code](response)
             # if (self.raise_exceptions):
