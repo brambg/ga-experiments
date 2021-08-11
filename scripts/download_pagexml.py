@@ -27,12 +27,16 @@ def read_document_page_info(document_id: str, number_of_scans: int):
 
 def download_pagexml(url: str, destination_dir: str):
     r = requests.get(url=url)
-    d = r.headers['content-disposition']
-    fname = re.findall('filename="(.+)"', d)[0]
-    path = f"{destination_dir}/{fname}"
-    with open(path, 'wb') as f:
-        f.write(r.content)
-    return path
+    if r.ok:
+        d = r.headers['content-disposition']
+        fname = re.findall('filename="(.+)"', d)[0]
+        path = f"{destination_dir}/{fname}"
+        with open(path, 'wb') as f:
+            f.write(r.content)
+        return path
+    else:
+        print(r.status_code)
+        print(r.content)
 
 
 def sanitize_titles(items, new_htr_archives):
@@ -69,11 +73,12 @@ def main():
     items = result['items']
     print(f"< {len(items)} documents found")
 
-    print(f"> reading {ARCHIVE_INFO_CSV}")
+    print(f"> reading {ARCHIVE_INFO_CSV}: ", end='')
     with open(ARCHIVE_INFO_CSV) as f:
         reader = csv.DictReader(f)
         new_htr_archives = [l for l in reader]
-    print(f"< {len(new_htr_archives)} newly htr-ed archives")
+    number_of_new_htr_archives = len(new_htr_archives)
+    print(f"{number_of_new_htr_archives} newly htr-ed archives")
 
     items = sanitize_titles(items, new_htr_archives)
 
@@ -81,22 +86,22 @@ def main():
 
     print(f"> processing archives:")
     pages_data = []
-    for a in new_htr_archives[0:2]:
+    for (i, a) in enumerate(new_htr_archives):
         title = a['TITLE']
         xml_dir = f"{PAGEXML_BASE_DIR}/{title}"
         os.makedirs(xml_dir, exist_ok=True)
-        print(f"    archive {title}:")
-        print(f">     downloading page info:")
+        print(f"    archive {title} ({i + 1}/{number_of_new_htr_archives}): ", end='')
         pages_info = read_document_page_info(title2id[title], a['AANTAL SCANS'])
-        print(f"<     {len(pages_info)} pages")
-        for page_info in pages_info[0:2]:
+        total_pages = len(pages_info)
+        print(f"{total_pages} pages")
+        for page_info in pages_info:
             scan_number = page_info['number']
-            print(f">       downloading page {scan_number}")
+            print(f">       downloading page {scan_number}/{total_pages}:", end='')
             iiif_url = page_info['previewImage']
             xml_url = page_info['xmlKey']
 
             file_path = download_pagexml(xml_url, xml_dir)
-            print(f"<       saved to {file_path}")
+            print(f" {file_path}", end='\r')
 
             pages_data.append({
                 "archive_title": title,
@@ -104,7 +109,7 @@ def main():
                 "file_path": file_path,
                 "iiif_url": iiif_url,
             })
-
+        print()
     print(f"> writing {PAGE_INFO_JSON}")
     with open(PAGE_INFO_JSON, 'w') as f:
         json.dump(pages_data, fp=f)
