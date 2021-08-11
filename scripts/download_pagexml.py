@@ -120,11 +120,11 @@ def main():
                     "file_path": file_path,
                     "iiif_url": iiif_url,
                 })
+                time.sleep(1)
             print()
             downloaded_archives.append(title)
             with open(DOWNLOADED_ARCHIVES_JSON, 'w') as f:
                 json.dump(downloaded_archives, f)
-            time.sleep(1)
 
     print(f"> writing {PAGE_INFO_JSON}")
     with open(PAGE_INFO_JSON, 'w') as f:
