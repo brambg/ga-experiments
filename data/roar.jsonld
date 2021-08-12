@@ -1,0 +1,23 @@
+{
+  "@context": {
+    "roar": "https://w3id.org/roar#",
+    "Document": "roar:Document",
+    "Entity": "roar:Entity",
+    "Location": "roar:Location",
+    "LocationObservation": "roar:LocationObservation",
+    "LocationReconstruction": "roar:LocationReconstruction",
+    "Observation": "roar:Observation",
+    "Person": "roar:Person",
+    "PersonObservation": "roar:PersonObservation",
+    "PersonReconstruction": "roar:PersonReconstruction",
+    "Reconstruction": "roar:Reconstruction",
+    "documentedIn": "roar:documentedIn",
+    "hasLocation": "roar:hasLocation",
+    "hasPerson": "roar:hasPerson",
+    "hasRelation": "roar:hasRelation",
+    "locationInDocument": "roar:locationInDocument",
+    "onScan": "roar:onScan",
+    "relationType": "roar:relationType",
+    "role": "roar:role"
+  }
+}

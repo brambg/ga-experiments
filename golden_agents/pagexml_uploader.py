@@ -4,9 +4,9 @@ from io import StringIO
 from typing import Dict
 
 import lxml.etree
+from textrepo.client import TextRepoClient
 
 from golden_agents.corrections import Corrector
-from golden_agents.textrepo_client import TextRepoClient
 from golden_agents.tools import read_werkvoorraad, read_scan_tags
 
 

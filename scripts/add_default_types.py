@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from golden_agents.textrepo_client import TextRepoClient
+from textrepo.client import TextRepoClient
 
 
 def main():

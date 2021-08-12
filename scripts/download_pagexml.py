@@ -112,7 +112,7 @@ def main():
                 xml_url = page_info['xmlKey']
 
                 file_path = download_pagexml(xml_url, xml_dir)
-                print(f" {file_path}", end='\r')
+                print(f" {file_path}", end='')
 
                 pages_data.append({
                     "archive_title": title,
@@ -121,6 +121,7 @@ def main():
                     "iiif_url": iiif_url,
                 })
                 time.sleep(1)
+                print("", end='\r')
             print()
             downloaded_archives.append(title)
             with open(DOWNLOADED_ARCHIVES_JSON, 'w') as f:
