@@ -1,0 +1,131 @@
+from collections import Counter, defaultdict
+
+import progressbar as progressbar
+from elasticsearch import Elasticsearch
+from icecream import ic
+
+import golden_agents.tools as ga
+
+archive_idx = 'archives'
+scan_idx = 'scans'
+
+
+def main():
+    es = Elasticsearch(hosts="https://es_goldenagents.tt.di.huc.knaw.nl/", http_compress=True)
+    delete_indexes(es)
+    index_archives(es)
+    index_scans(es)
+
+
+def delete_indexes(es):
+    es.indices.delete(index=archive_idx)
+    es.indices.delete(index=scan_idx)
+
+
+def index_archives(es):
+    werkvoorraad = ga.read_werkvoorraad()
+    sanity_check(werkvoorraad)
+    bar = default_progress_bar(len(werkvoorraad))
+    for i, a in enumerate(werkvoorraad):
+        bar.update(i)
+        id = a.title
+        data = a.to_json()
+        r = es.index(index=archive_idx, id=id, body=data)
+    es.indices.refresh(index=archive_idx)
+
+
+def index_scans(es):
+    sd = ga.read_scan_data()
+    idx = {d.title: d.id for d in sd}
+    ic(idx)
+    paths = ga.all_page_xml_file_paths()
+    scan_tags = ga.read_scan_tags()
+    filenames = defaultdict(list)
+    for p in paths:
+        (a, s) = p.split('/')
+        filenames[a].append(s)
+    titles_without_directories = set()
+    titles_with_insufficient_files = set()
+    max_value = len(sd)
+    bar = default_progress_bar(max_value)
+    for i, d in enumerate(sd):
+        bar.update(i)
+        if (d.title not in filenames):
+            # print(f"no files found for {d.title}")
+            titles_without_directories.add(d.title)
+        else:
+            n = int(d.number)
+            fn = filenames[d.title]
+            if len(fn) < n:
+                # print(f"{d.title} has just {len(fn)} files, number {n} not found")
+                titles_with_insufficient_files.add(d.title)
+            else:
+                filename = fn[n - 1]
+                id = filename.replace('.xml', '').upper()
+                archive_id = idx[d.title]
+                data = {
+                    "archive_title": d.title,
+                    "n": n,
+                    "iiif_base_url": d.previewImage.replace('/full/128,/0/default.jpg', ''),
+                    "transkribus_url": ga.transkribus_url(archive_id=archive_id, page_index=n),
+                    "filename": filename
+                }
+                if id in scan_tags:
+                    data["tags"] = scan_tags[id]
+                r = es.index(index=scan_idx, id=id, body=data)
+    print()
+    ic(titles_without_directories)
+    ic(titles_with_insufficient_files)
+    es.indices.refresh(index=scan_idx)
+
+
+def default_progress_bar(max_value):
+    widgets = [' [',
+               progressbar.Timer(format='elapsed time: %(elapsed)s'),
+               '] ',
+               progressbar.Bar('*'),
+               ' (',
+               progressbar.ETA(),
+               ') ',
+               ]
+    return progressbar.ProgressBar(max_value=max_value,
+                                   widgets=widgets).start()
+
+
+def sanity_check(werkvoorraad):
+    ids = [a.title for a in werkvoorraad]
+    c = Counter(ids)
+    ic(c.most_common(10))
+    dup = [a for a in werkvoorraad if a.title == '12788_NOTI01181']
+    ic(dup)
+
+
+def test():
+    es = Elasticsearch(hosts="https://es_goldenagents.tt.di.huc.knaw.nl/")
+    test = {
+        "hello": "world",
+        "test": True,
+        "id": 1
+    }
+
+    index = 'test'
+    res = es.index(index=index, id=1, body=test)
+    ic(res)
+
+    res = es.get(index=index, id=1)
+    ic(res)
+
+    res = es.indices.refresh(index=index)
+    ic(res)
+
+    query = {"query": {"match_all": {}}}
+    res = es.search(index=index, body=query)
+    ic(res)
+    print("Got %d Hits:" % res['hits']['total']['value'])
+    for hit in res['hits']['hits']:
+        print("%(id)i - %(hello)s - %(test)s" % hit["_source"])
+    es.delete(index=index)
+
+
+if __name__ == '__main__':
+    main()
