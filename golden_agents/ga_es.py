@@ -6,12 +6,13 @@ from icecream import ic
 
 import golden_agents.tools as ga
 
+es_host = "https://es_goldenagents.tt.di.huc.knaw.nl/"
 archive_idx = 'archives'
 scan_idx = 'scans'
 
 
 def main():
-    es = Elasticsearch(hosts="https://es_goldenagents.tt.di.huc.knaw.nl/", http_compress=True)
+    es = Elasticsearch(hosts=es_host, http_compress=True)
     delete_indexes(es)
     index_archives(es)
     index_scans(es)
@@ -25,6 +26,7 @@ def delete_indexes(es):
 def index_archives(es):
     werkvoorraad = ga.read_werkvoorraad()
     sanity_check(werkvoorraad)
+    print(f"uploading to {es_host}/{archive_idx}:")
     bar = default_progress_bar(len(werkvoorraad))
     for i, a in enumerate(werkvoorraad):
         bar.update(i)
@@ -37,7 +39,6 @@ def index_archives(es):
 def index_scans(es):
     sd = ga.read_scan_data()
     idx = {d.title: d.id for d in sd}
-    ic(idx)
     paths = ga.all_page_xml_file_paths()
     scan_tags = ga.read_scan_tags()
     filenames = defaultdict(list)
@@ -47,6 +48,7 @@ def index_scans(es):
     titles_without_directories = set()
     titles_with_insufficient_files = set()
     max_value = len(sd)
+    print(f"uploading to {es_host}/{scan_idx}:")
     bar = default_progress_bar(max_value)
     for i, d in enumerate(sd):
         bar.update(i)
@@ -98,33 +100,6 @@ def sanity_check(werkvoorraad):
     ic(c.most_common(10))
     dup = [a for a in werkvoorraad if a.title == '12788_NOTI01181']
     ic(dup)
-
-
-def test():
-    es = Elasticsearch(hosts="https://es_goldenagents.tt.di.huc.knaw.nl/")
-    test = {
-        "hello": "world",
-        "test": True,
-        "id": 1
-    }
-
-    index = 'test'
-    res = es.index(index=index, id=1, body=test)
-    ic(res)
-
-    res = es.get(index=index, id=1)
-    ic(res)
-
-    res = es.indices.refresh(index=index)
-    ic(res)
-
-    query = {"query": {"match_all": {}}}
-    res = es.search(index=index, body=query)
-    ic(res)
-    print("Got %d Hits:" % res['hits']['total']['value'])
-    for hit in res['hits']['hits']:
-        print("%(id)i - %(hello)s - %(test)s" % hit["_source"])
-    es.delete(index=index)
 
 
 if __name__ == '__main__':
