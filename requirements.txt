@@ -1,5 +1,6 @@
 analiticcl
 dataclasses-json
+elasticsearch
 elucidate-client
 icecream
 lxml
@@ -8,6 +9,7 @@ numpy
 scipy
 pagexml
 python-dateutil==2.8.1
+progressbar2
 requests
 textrepo-client
 xmltodict
