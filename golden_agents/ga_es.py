@@ -1,19 +1,18 @@
 from collections import Counter, defaultdict
 
-import progressbar as progressbar
 from elasticsearch import Elasticsearch
 from icecream import ic
 
 import golden_agents.tools as ga
 
-es_host = "https://es_goldenagents.tt.di.huc.knaw.nl/"
+es_host = "https://es_goldenagents.tt.di.huc.knaw.nl"
 archive_idx = 'archives'
 scan_idx = 'scans'
 
 
 def main():
     es = Elasticsearch(hosts=es_host, http_compress=True)
-    delete_indexes(es)
+    # delete_indexes(es)
     index_archives(es)
     index_scans(es)
 
@@ -24,16 +23,24 @@ def delete_indexes(es):
 
 
 def index_archives(es):
+    sd = ga.read_scan_data()
+    idx = {d.title: d.id for d in sd}
     werkvoorraad = ga.read_werkvoorraad()
     sanity_check(werkvoorraad)
-    print(f"uploading to {es_host}/{archive_idx}:")
-    bar = default_progress_bar(len(werkvoorraad))
+    print(f"- uploading to {es_host}/{archive_idx}:")
+    bar = ga.default_progress_bar(len(werkvoorraad))
+    unmatched_titles = set()
     for i, a in enumerate(werkvoorraad):
         bar.update(i)
         id = a.title
-        data = a.to_json()
+        data = a.__dict__
+        if id in idx:
+            data['archive_id'] = idx[id]
+        else:
+            unmatched_titles.add(id)
         r = es.index(index=archive_idx, id=id, body=data)
     es.indices.refresh(index=archive_idx)
+    ic(unmatched_titles)
 
 
 def index_scans(es):
@@ -48,11 +55,11 @@ def index_scans(es):
     titles_without_directories = set()
     titles_with_insufficient_files = set()
     max_value = len(sd)
-    print(f"uploading to {es_host}/{scan_idx}:")
-    bar = default_progress_bar(max_value)
+    print(f"- uploading to {es_host}/{scan_idx}:")
+    bar = ga.default_progress_bar(max_value)
     for i, d in enumerate(sd):
         bar.update(i)
-        if (d.title not in filenames):
+        if d.title not in filenames:
             # print(f"no files found for {d.title}")
             titles_without_directories.add(d.title)
         else:
@@ -80,18 +87,6 @@ def index_scans(es):
     ic(titles_with_insufficient_files)
     es.indices.refresh(index=scan_idx)
 
-
-def default_progress_bar(max_value):
-    widgets = [' [',
-               progressbar.Timer(format='elapsed time: %(elapsed)s'),
-               '] ',
-               progressbar.Bar('*'),
-               ' (',
-               progressbar.ETA(),
-               ') ',
-               ]
-    return progressbar.ProgressBar(max_value=max_value,
-                                   widgets=widgets).start()
 
 
 def sanity_check(werkvoorraad):

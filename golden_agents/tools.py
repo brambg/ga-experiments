@@ -4,6 +4,7 @@ import json
 from dataclasses import dataclass
 from typing import List
 
+import progressbar as progressbar
 from dataclasses_json import dataclass_json
 
 DATA_DIR = '../pagexml'
@@ -103,6 +104,19 @@ def file_url(scan_path: str):
 
 
 def all_page_xml_file_paths() -> List[str]:
-    with open('data/all-pagexml.lst') as f:
+    with open('../data/all-pagexml.lst') as f:
         paths = f.readlines()
     return [p.strip() for p in paths]
+
+
+def default_progress_bar(max_value):
+    widgets = [' [',
+               progressbar.Timer(format='elapsed time: %(elapsed)s'),
+               '] ',
+               progressbar.Bar('*'),
+               ' (',
+               progressbar.ETA(),
+               ') ',
+               ]
+    return progressbar.ProgressBar(max_value=max_value,
+                                   widgets=widgets).start()
