@@ -1,6 +1,9 @@
+**.egg-info/
 **/__pycache__/
 .idea/
 .ipynb_checkpoints/
 .pytest_cache/
+notebooks/Untitled*.ipynb
 out/
 venv/
+docker/
