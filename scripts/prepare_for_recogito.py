@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import re
 from dataclasses import dataclass
 
 import pagexml.parser as px
@@ -16,9 +17,10 @@ class LineInfo:
     text: str
     id: str
     offset: int
+    page_id: str
 
 
-def main():
+def main1():
     parser = argparse.ArgumentParser(description="Extract text contents from Page XML",
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("files", nargs='*', help="Files")
@@ -36,7 +38,7 @@ def main():
         for l in scan.get_lines():
             if l.text:
                 lines.append(l.text)
-                li = LineInfo(id=l.id, text=l.text, offset=offset)
+                li = LineInfo(id=l.id, text=l.text, offset=offset, page_id=basename)
                 line_infos.append(li)
                 offset += len(l.text) + 1
         if len(lines) > 0:
@@ -47,5 +49,40 @@ def main():
     print()
 
 
+def main2():
+    parser = argparse.ArgumentParser(description="Extract text contents from all Page XML in a directory",
+                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument("directories", nargs='*', help="Directories")
+    args = parser.parse_args()
+    bar1 = ga.default_progress_bar(len(args.directories))
+    r = re.compile('.*/([^/]+)/?$')
+    for i, directory in enumerate(args.directories):
+        bar1.update(i + 1)
+        basename = r.match(directory).group(1)
+        scan_paths = ga.scan_paths(directory)
+        text_file = f"out/{basename}.txt"
+        metadata_file = f"out/{basename}.json"
+        line_infos = []
+        lines = []
+        offset = 0
+        bar2 = ga.default_progress_bar(len(scan_paths))
+        for j, filename in enumerate(scan_paths):
+            bar2.update(j)
+            page_basename = filename.split('/')[-1].replace('.xml', '')
+            scan = px.parse_pagexml_file(filename)
+            for l in scan.get_lines():
+                if l.text:
+                    lines.append(l.text)
+                    li = LineInfo(id=l.id, text=l.text, offset=offset, page_id=page_basename)
+                    line_infos.append(li)
+                    offset += len(l.text) + 1
+        if len(lines) > 0:
+            with open(text_file, 'w') as f:
+                f.write("\n".join(lines))
+            with open(metadata_file, 'w', encoding='utf8') as f:
+                json.dump([li.to_dict() for li in line_infos], f, indent=4)
+    print()
+
+
 if __name__ == '__main__':
-    main()
+    main2()
