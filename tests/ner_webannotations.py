@@ -22,14 +22,13 @@ model.build()
 
 FILE = '../../pagexml/2408_A16098/a16098000013.xml'
 
-
 scan = parse_pagexml_file(FILE)
 if not scan.id:
     path_parts = FILE.split('/')
     archive_id = path_parts[-2]
     scan_id = path_parts[-1].replace('.xml', '')
     scan.id = f"urn:golden-agents:{archive_id}:scan={scan_id}"
-scan.transkribus_uri="https://files.transkribus.eu/iiif/2/MOQMINPXXPUTISCRFIRKIOIX/full/max/0/default.jpg"
+scan.transkribus_uri = "https://files.transkribus.eu/iiif/2/MOQMINPXXPUTISCRFIRKIOIX/full/max/0/default.jpg"
 
 
 def text_line_urn(archive_id: str, scan_id: str, textline_id: str):
