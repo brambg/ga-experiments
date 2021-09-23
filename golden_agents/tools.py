@@ -7,10 +7,13 @@ from typing import List
 import progressbar as progressbar
 from dataclasses_json import dataclass_json
 
-DATA_DIR = '../pagexml'
-SCANS_FILE = 'data/scans_20210403.csv'
-INVENTORY_FILE = 'data/werkvoorraad.csv'
-TAGS_FILE = 'data/scan_tags.json'
+RELATIVE_PATH = ''
+# RELATIVE_PATH = '../'
+DATA_DIR = f'{RELATIVE_PATH}../pagexml'
+SCANS_FILE = f'{RELATIVE_PATH}data/scans_20210403.csv'
+INVENTORY_FILE = f'{RELATIVE_PATH}data/werkvoorraad.csv'
+TAGS_FILE = f'{RELATIVE_PATH}data/scan_tags.json'
+ALL_PAGEXML_LST = f'{RELATIVE_PATH}data/all-pagexml.lst'
 
 
 @dataclass_json
@@ -30,7 +33,7 @@ class ScanData:
 class WorkData:
     """Data from werkvoorraad"""
     rubric: int
-    inventoryNumber: int
+    inventoryNumber: str
     serialNumber: str
     title: str
     writer: str
@@ -68,8 +71,7 @@ def read_werkvoorraad():
         reader = csv.reader(f, delimiter=';')
         data = [tuple(row) for row in reader]
 
-    wdl = [WorkData(*wd) for wd in data[1:]]
-    return wdl
+    return [WorkData(*wd) for wd in data[1:]]
 
 
 def read_scan_tags():
@@ -78,7 +80,10 @@ def read_scan_tags():
 
 
 def extract_writer_index(work_data_list):
-    return {t[0]: Writer(*t) for t in set([(wd.rubric, wd.writer) for wd in work_data_list])}
+    return {
+        t[0]: Writer(*t)
+        for t in {(wd.rubric, wd.writer) for wd in work_data_list}
+    }
 
 
 def extract_archive_index(work_data_list):
@@ -104,7 +109,7 @@ def file_url(scan_path: str):
 
 
 def all_page_xml_file_paths() -> List[str]:
-    with open('../data/all-pagexml.lst') as f:
+    with open(ALL_PAGEXML_LST) as f:
         paths = f.readlines()
     return [p.strip() for p in paths]
 

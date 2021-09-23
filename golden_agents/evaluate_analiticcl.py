@@ -44,24 +44,19 @@ def main():
     for ef in evaluation_files:
         gt_file = f'../pagexml/{ef.gt_path}'
         gt_scan = px.parse_pagexml_file(gt_file)
-        gt_line_info = []
-        for l in gt_scan.get_lines():
-            if l.text:
-                gt_line_info.append(LineInfo(
+
+        gt_line_info = [LineInfo(
                     id=l.id,
                     text=l.text,
                     polygon=(Polygon(l.coords.points))
-                ))
+                ) for l in gt_scan.get_lines() if l.text]
         htr_file = f'../pagexml/{ef.htr_path}'
         htr_scan = px.parse_pagexml_file(htr_file)
-        htr_line_info = []
-        for l in htr_scan.get_lines():
-            if l.text:
-                htr_line_info.append(LineInfo(
+        htr_line_info = [LineInfo(
                     id=l.id,
                     text=l.text,
                     polygon=(Polygon(l.coords.points))
-                ))
+                ) for l in htr_scan.get_lines() if l.text]
         for li in gt_line_info:
             if not li.polygon.is_valid:
                 print(li)

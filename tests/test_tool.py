@@ -147,8 +147,7 @@ def write_archive_page():
 
 
 def scan_tags_index():
-    scan_tags = {k.lower(): v for (k, v) in read_scan_tags().items()}
-    return scan_tags
+    return {k.lower(): v for (k, v) in read_scan_tags().items()}
 
 
 def write_scan_pages():

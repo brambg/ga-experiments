@@ -53,7 +53,7 @@ class PageXMLUploader:
             for tag in tags:
                 ok = tr.set_document_metadata(document_id, f'tag_{tag}', 'True')
         base_uri = tr.base_uri
-        upload_info = {
+        return {
             'external_id': external_id,
             'document': f'{base_uri}/rest/documents/{document_id}',
             'document_metadata': f'{base_uri}/rest/documents/{document_id}/metadata',
@@ -65,18 +65,16 @@ class PageXMLUploader:
             'version_metadata': f'{base_uri}/rest/versions/{version_id}/metadata',
             'version_contents': f'{base_uri}/rest/versions/{version_id}/contents'
         }
-        return upload_info
 
 
 def get_pagexml_type_id(textrepo: TextRepoClient) -> int:
     existing_types = textrepo.read_file_types()
     type_id_index = {t.name: t.id for t in existing_types}
     pagexml = 'pagexml'
-    if pagexml not in type_id_index.keys():
-        type = textrepo.create_file_type(pagexml, 'application/vnd.prima.page+xml')
-        return type.id
-    else:
+    if pagexml in type_id_index:
         return type_id_index[pagexml]
+    type = textrepo.create_file_type(pagexml, 'application/vnd.prima.page+xml')
+    return type.id
 
 
 def correct_htr(htr_corrector: Corrector, filename: str):
@@ -94,7 +92,7 @@ def correct_htr(htr_corrector: Corrector, filename: str):
                 corrections[original] = corrected
     corrected_xml = original_xml
     is_corrected = False
-    if len(corrections) > 0:
+    if corrections:
         is_corrected = True
         original_last_change = doc.xpath("//pagexml:Metadata/pagexml:LastChange", namespaces={
             'pagexml': 'http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15'})[0].text

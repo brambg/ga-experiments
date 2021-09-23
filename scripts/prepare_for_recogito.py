@@ -15,9 +15,9 @@ import golden_agents.tools as ga
 @dataclass
 class LineInfo:
     text: str
-    id: str
-    offset: int
     page_id: str
+    line_id: str
+    offset: int
 
 
 def main1():
@@ -38,10 +38,10 @@ def main1():
         for l in scan.get_lines():
             if l.text:
                 lines.append(l.text)
-                li = LineInfo(id=l.id, text=l.text, offset=offset, page_id=basename)
+                li = LineInfo(line_id=l.id, text=l.text, offset=offset, page_id=basename)
                 line_infos.append(li)
                 offset += len(l.text) + 1
-        if len(lines) > 0:
+        if lines:
             with open(text_file, 'w') as f:
                 f.write("\n".join(lines))
             with open(metadata_file, 'w', encoding='utf8') as f:
@@ -73,10 +73,10 @@ def main2():
             for l in scan.get_lines():
                 if l.text:
                     lines.append(l.text)
-                    li = LineInfo(id=l.id, text=l.text, offset=offset, page_id=page_basename)
+                    li = LineInfo(line_id=l.id, text=l.text, offset=offset, page_id=page_basename)
                     line_infos.append(li)
                     offset += len(l.text) + 1
-        if len(lines) > 0:
+        if lines:
             with open(text_file, 'w') as f:
                 f.write("\n".join(lines))
             with open(metadata_file, 'w', encoding='utf8') as f:
@@ -85,4 +85,5 @@ def main2():
 
 
 if __name__ == '__main__':
-    main2()
+    main1()
+    # main2()

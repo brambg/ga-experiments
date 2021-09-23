@@ -19,11 +19,10 @@ def main():
             original_line = "\t".join(t)
             print(
                 f'{HTR_CORRECTIONS_TSV}:{i} : unexpected input ({len(t)} fields instead of the expected 3) : {original_line}')
+        elif t[0] in corrections:
+            print(f'{HTR_CORRECTIONS_TSV}:{i} : duplicate term {t[0]}')
         else:
-            if t[0] in corrections:
-                print(f'{HTR_CORRECTIONS_TSV}:{i} : duplicate term {t[0]}')
-            else:
-                corrections[t[0]] = t[2].replace('’', "'")
+            corrections[t[0]] = t[2].replace('’', "'")
 
     print(f"> writing {len(corrections)} records to {HTR_CORRECTIONS_JSON}")
     with open(HTR_CORRECTIONS_JSON, 'w') as f:
