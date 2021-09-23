@@ -5,7 +5,7 @@ class Corrector:
 
     def __init__(self, corrections: dict):
         self.corrections = corrections
-        self.max_ngram = max(k.count(' ') for k in corrections.keys()) + 1
+        self.max_ngram = max(k.count(' ') for k in corrections) + 1
 
     def correct(self, raw_str: str) -> str:
         corrected = raw_str
@@ -16,7 +16,7 @@ class Corrector:
                 orig = " ".join(t)
                 if orig in self.corrections:
                     ngram_corrections[i] = self.corrections[orig]
-            if len(ngram_corrections) > 0:
+            if ngram_corrections:
                 corrected_terms = []
                 i = 0
                 while i < len(words):
