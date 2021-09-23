@@ -23,9 +23,8 @@ def read_document_page_info(document_id: str, number_of_scans: int):
     result = requests.post(url=url, headers=headers, json=body)
     if result.ok:
         return result.json()['items']
-    else:
-        print(result.status_code)
-        print(result.content)
+    print(result.status_code)
+    print(result.content)
 
 
 def download_pagexml(url: str, destination_dir: str):
@@ -43,8 +42,8 @@ def download_pagexml(url: str, destination_dir: str):
 
 
 def sanitize_titles(items, new_htr_archives):
-    new_htr_titles = set([a['TITLE'] for a in new_htr_archives])
-    transkribus_titles = set([t['title'] for t in items])
+    new_htr_titles = {a['TITLE'] for a in new_htr_archives}
+    transkribus_titles = {t['title'] for t in items}
     unmatched_aanvulling_titles = new_htr_titles - transkribus_titles
     if len(unmatched_aanvulling_titles) > 0:
         print(
