@@ -196,3 +196,105 @@
   documentname: GA_1686-10-12_4123
   recogitoUrl: https://recogito.pelagios.org/document/xzbaopfhhrjrjo
   status: HTR
+
+- akteIndex: https://archief.amsterdam/indexen/deeds/9d6d21e4-0323-666d-e053-b784100a1840
+  date: '1767-05-22'
+  inventoryIndex: https://archief.amsterdam/inventarissen/file/ef13479703d78b7fb0c2a67e2dfab539
+  inventoryNumber: '10064'
+  inventoryName: 1767 Januari 5-1768 December 30;met alphab.index in no.10068.
+  temporalCoverage: 1767-01-01/1768-12-31
+  minuutakte: '0'
+  segments:
+  - NOTA01000000106
+  - NOTA01000000107
+  - NOTA01000000108
+  - NOTA01000000109
+  notary: PHILIP ZWEERTS
+  rootpath: 10064_NOTA01000
+  status: HTR
+  documentname: GA_1767-05-22_10064
+  recogitoUrl: https://recogito.pelagios.org/document/ampe0ad1npwg2y
+
+- akteIndex: https://archief.amsterdam/indexen/deeds/9d6d21e0-fd41-666d-e053-b784100a1840
+  date: '1674-10-20'
+  inventoryIndex: https://archief.amsterdam/inventarissen/file/cff8977c8348a1383928328ff8a01056
+  inventoryNumber: '2371'
+  inventoryName: no.17. 1674 Mei 10-1675 October 16;met alphab.index.
+  temporalCoverage: 1674-01-01/1675-12-31
+  minuutakte: '1'
+  segments:
+  - NOTD00244000026
+  - NOTD00244000028
+  - NOTD00244000027
+  notary: JACOB DE WINTER
+  rootpath: 2371_NOTD00244
+  status: HTR
+  documentname: GA_1674-10-20_2371
+  recogitoUrl: https://recogito.pelagios.org/document/2meyz9hzxp7ugw
+
+- akteIndex: https://archief.amsterdam/indexen/deeds/a3cb51cc-7981-50ee-e053-b784100a6caf
+  date: '1644-07-05'
+  inventoryIndex: https://archief.amsterdam/inventarissen/file/e71cd061147cd7e23f0d270580688b95
+  inventoryNumber: '1289'
+  inventoryName: 1644 Januari 2-1644 November 1;met alphab.index.
+  temporalCoverage: 1644-01-01/1644-12-31
+  minuutakte: '1'
+  segments:
+  - KLAB05562000093
+  - KLAB05562000094
+  - KLAB05562000095
+  - KLAB05562000096
+  notary: HENDRIK SCHAEF
+  rootpath: 1289_KLAB05562
+  status: HTR
+  documentname: GA_1644-07-05_1289
+  recogitoUrl: https://recogito.pelagios.org/document/z1logumnlz8mbl
+
+- akteIndex: https://archief.amsterdam/indexen/deeds/b21a5c6d-9690-6a83-e053-b784100a6e32
+  date: '1651-04-05'
+  inventoryIndex: https://archief.amsterdam/inventarissen/file/c4d7cb51c8b6b0f6cd64cdec6e47a323
+  inventoryNumber: '2278'
+  inventoryName: Afschriften, in'Protocol'.; 1648 November 13-1651 April 21;met alphab.index.
+  temporalCoverage: 1648-01-01/1651-12-31
+  minuutakte: '0'
+  segments:
+  - A16097000219
+  - A16097000220
+  notary: JACOB DE WINTER
+  rootpath: 2278_A16097
+  status: HTR
+  documentname: GA_1651-04-05_2278
+  recogitoUrl: https://recogito.pelagios.org/document/gjglchi8wiifvs
+
+- akteIndex: https://archief.amsterdam/indexen/deeds/9d6d21e3-ffad-666d-e053-b784100a1840
+  date: '1759-04-25'
+  inventoryIndex: https://archief.amsterdam/inventarissen/file/75444096e6e96bf83d5ade8358c44cb3
+  inventoryNumber: '14257'
+  inventoryName: 1759 Februari 7-1759 December 19.
+  temporalCoverage: 1759-01-01/1759-12-31
+  minuutakte: '1'
+  segments:
+  - KLAC00451000198
+  - KLAC00451000199
+  - KLAC00451000200
+  - KLAC00451000201
+  - KLAC00451000202
+  - KLAC00451000203
+  - KLAC00451000204
+  - KLAC00451000205
+  - KLAC00451000206
+  - KLAC00451000207
+  - KLAC00451000208
+  - KLAC00451000209
+  - KLAC00451000210
+  - KLAC00451000211
+  - KLAC00451000212
+  - KLAC00451000213
+  - KLAC00451000214
+  - KLAC00451000215
+  - KLAC00451000216
+  notary: HENDRIK DANIEL VAN HOORN
+  rootpath: 14257_KLAC00451
+  status: HTR
+  documentname: GA_1759-04-25_14257
+  recogitoUrl: https://recogito.pelagios.org/document/ixws3o1hbtrj4x
