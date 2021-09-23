@@ -1,0 +1,198 @@
+---
+- akteIndex: https://archief.amsterdam/indexen/deeds/9d6d21df-e959-666d-e053-b784100a1840
+  date: '1736-11-05'
+  inventoryIndex: https://archief.amsterdam/inventarissen/file/562d61dead0096f262fe1913f13d8d4f
+  inventoryNumber: '10028'
+  inventoryName: 1736 Januari 2-1736 December 29;met alphab.index.
+  temporalCoverage: 1736-01-01/1736-12-31
+  minuutakte: '0'
+  segments:
+  - NOTA00966000480
+  - NOTA00966000481
+  - NOTA00966000482
+  - NOTA00966000483
+  notary: PHILIP ZWEERTS
+  rootpath: 10028_NOTA00966
+  documentname: GA_1736-11-05_10028
+  recogitoUrl: https://recogito.pelagios.org/document/d2hnoiacoqjhjp
+  status: HTR
+
+- akteIndex: https://archief.amsterdam/indexen/deeds/9d6d21e2-9950-666d-e053-b784100a1840
+  date: '1665-06-22'
+  inventoryIndex: https://archief.amsterdam/inventarissen/file/9e3d698b084d8274195ae39238a234f3
+  inventoryNumber: '2408'
+  inventoryName: no.1. 1648 December 10-1649 April 27;met chronol.index;no.2. 1649
+    Maart 8-1651 Augustus 28;met chronol.index;no.3. 1651 September 4-1652 April 9;met
+    chronol.index;no.4. 1652 Maart 16-1652 November 30;met chronol.index;no.5.1652
+    December 20-1654 Maart 14;met chronol.index;no.6. 1653 Januari 21-1656 April 7;met
+    chronol.index;no.7. 1656 April 24-1660 April 22;met chronol.index;no.8. 1659 April
+    29-1661 October 17;met chronol.index;no.9. 1661 October 26-1664 Mei 23;met chronol.index;no.10.
+    1664 Juni 28-1665 Juli 2;met chronol.index.
+  temporalCoverage: 1648-01-01/1665-12-31
+  minuutakte: '1'
+  segments:
+  - A16098000590
+  - A16098000591
+  - A16098000592
+  - A16098000593
+  - A16098000594
+  notary: JACOB DE WINTER
+  rootpath: 2408_A16098
+  documentname: GA_1665-06-22_2408
+  recogitoUrl: https://recogito.pelagios.org/document/vdrysia8egqaed
+  status: GT
+
+- akteIndex: https://archief.amsterdam/indexen/deeds/9d6d21e2-ceb0-666d-e053-b784100a1840
+  date: '1613-06-13'
+  inventoryIndex: https://archief.amsterdam/inventarissen/file/4d62419dfd7fc0d565ba05fd0c2d1795
+  inventoryNumber: 481B
+  inventoryName: 1614 Juni-1617 Dec.
+  temporalCoverage: 1614-01-01/1617-12-31
+  minuutakte: '1'
+  segments:
+  - A26334000002
+  - A26334000003
+  - A26334000004
+  notary: PALM MATHIJSZ
+  rootpath: 481B_A26334
+  documentname: GA_1613-06-13_481B
+  recogitoUrl: https://recogito.pelagios.org/document/yrnhiywpyva2ir
+  status: GT
+
+- akteIndex: https://archief.amsterdam/indexen/deeds/9d6d21df-a147-666d-e053-b784100a1840
+  date: '1624-10-09'
+  inventoryIndex: https://archief.amsterdam/inventarissen/file/8a8e823658f2c255bd804d48b19c84c5
+  inventoryNumber: 562A
+  inventoryName: Inventaris 562A
+  temporalCoverage: 1616-01-01/1625-12-31
+  minuutakte: '1'
+  segments:
+  - A25337000394
+  - A25337000395
+  - A25337000396
+  notary: JACOB JANSZ WESTFRISIUS
+  rootpath: 562A_A25337
+  documentname: GA_1624-10-09_562A
+  recogitoUrl: https://recogito.pelagios.org/document/afu4vcbaawjlue
+  status: GT
+
+- akteIndex: https://archief.amsterdam/indexen/deeds/bebf5fd4-a25f-1e00-e053-b784100af734
+  date: '1721-08-12'
+  inventoryIndex: https://archief.amsterdam/inventarissen/file/99e35cc52b73daa9123762e201def4e1
+  inventoryNumber: 8307B
+  inventoryName: 1719 Mei 15-1719 November 29;zonder alphab.index;1720 Ontbreekt;1721
+    Januari 4-1721 December 10;met alphab.index;1722 April 13-1722 December 21;zonder
+    alphab.index;1723 Ontbreekt.Fol.348-616.
+  temporalCoverage: 1719-01-01/1722-12-31
+  minuutakte: '1'
+  segments:
+  - VBPD00008000239
+  - VBPD00008000240
+  - VBPD00008000241
+  - VBPD00008000242
+  - VBPD00008000243
+  - VBPD00008000244
+  - VBPD00008000245
+  - VBPD00008000246
+  - VBPD00008000247
+  - VBPD00008000248
+  - VBPD00008000249
+  - VBPD00008000250
+  - VBPD00008000251
+  - VBPD00008000252
+  - VBPD00008000253
+  notary: WILLEM DE FAY
+  rootpath: 8307B_VBPD00008
+  documentname: GA_1721-08-12_8307B
+  recogitoUrl: https://recogito.pelagios.org/document/yrapova8izq4wg
+  status: HTR
+
+- akteIndex: https://archief.amsterdam/indexen/deeds/9d6d21e3-c124-666d-e053-b784100a1840
+  date: '1638-11-03'
+  inventoryIndex: https://archief.amsterdam/inventarissen/file/42f7a1941443c68a4ea61a73e74c5ee4
+  inventoryNumber: '1279'
+  inventoryName: 1638 Januari 5-1638 December 30;met alphab.index.
+  temporalCoverage: 1638-01-01/1638-12-31
+  minuutakte: '1'
+  segments:
+  - A30746000072
+  - A30746000073
+  - A30746000074
+  notary: HENDRIK SCHAEF
+  rootpath: 1279_A30746
+  documentname: GA_1638-11-03_1279
+  recogitoUrl: https://recogito.pelagios.org/document/ilrzlwt68rtjcw
+  status: GT
+
+- akteIndex: https://archief.amsterdam/indexen/deeds/9d6d21e0-0267-666d-e053-b784100a1840
+  date: '1767-10-27'
+  inventoryIndex: https://archief.amsterdam/inventarissen/file/7fe5794e109a31546e4314befc901475
+  inventoryNumber: '14264'
+  inventoryName: 1767 Maart 5-1768 December 30.
+  temporalCoverage: 1767-01-01/1768-12-31
+  minuutakte: '1'
+  segments:
+  - KLAC00371000173
+  - KLAC00371000174
+  - KLAC00371000175
+  notary: HENDRIK DANIEL VAN HOORN
+  rootpath: 14264_KLAC00371
+  documentname: GA_1767-10-27_14264
+  recogitoUrl: https://recogito.pelagios.org/document/ft7guaozz7bxtl
+  status: HTR
+
+- akteIndex: https://archief.amsterdam/indexen/deeds/9d6d21e3-c9c0-666d-e053-b784100a1840
+  date: '1752-03-20'
+  inventoryIndex: https://archief.amsterdam/inventarissen/file/03eafec360299d6cc32ff15cb29f4b33
+  inventoryNumber: '12808'
+  inventoryName: 1752 Januari 3-1752 Maart 31;met alphab.index.
+  temporalCoverage: 1752-01-01/1752-12-31
+  minuutakte: '1'
+  segments:
+  - A33456000392
+  - A33456000393
+  - A33456000394
+  - A33456000395
+  notary: HERMANUS VAN HEEL
+  rootpath: 12808_A33456
+  documentname: GA_1752-03-20_12808
+  recogitoUrl: https://recogito.pelagios.org/document/bgedzatkzzrzhz
+  status: HTR
+
+- akteIndex: https://archief.amsterdam/indexen/deeds/9d6d21e0-716f-666d-e053-b784100a1840
+  date: '1701-08-04'
+  inventoryIndex: https://archief.amsterdam/inventarissen/file/5328579ea06a431b0ceeec55408ab333
+  inventoryNumber: '6924'
+  inventoryName: 1698 Maart 4-1710 December 29;met alphab. index.
+  temporalCoverage: 1698-01-01/1710-12-31
+  minuutakte: '1'
+  segments:
+  - KLAB05138000143
+  - KLAB05138000144
+  - KLAB05138000145
+  - KLAB05138000146
+  - KLAB05138000147
+  - KLAB05138000148
+  - KLAB05138000149
+  notary: DAVID DES POMMARE
+  rootpath: 6924_KLAB05138
+  documentname: GA_1701-08-04_6924
+  recogitoUrl: https://recogito.pelagios.org/document/me8kml5i64cn0w
+  status: GT
+
+- akteIndex: https://archief.amsterdam/indexen/deeds/9d6d21e3-cc98-666d-e053-b784100a1840
+  date: '1686-10-12'
+  inventoryIndex: https://archief.amsterdam/inventarissen/file/bb6a8d2545ea36782ddec86202d80c9b
+  inventoryNumber: '4123'
+  inventoryName: 1686 September 2-1686 October 31;alphab.index in no. 4279.
+  temporalCoverage: 1686-01-01/1686-12-31
+  minuutakte: '1'
+  segments:
+  - A25555000317
+  - A25555000318
+  - A25555000316
+  notary: DIRK VAN DER GROE
+  rootpath: 4123_A25555
+  documentname: GA_1686-10-12_4123
+  recogitoUrl: https://recogito.pelagios.org/document/xzbaopfhhrjrjo
+  status: HTR
