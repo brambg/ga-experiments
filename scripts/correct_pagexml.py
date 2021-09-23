@@ -36,7 +36,7 @@ for filename in args.files:
                 print(f'original:  {original}')
                 print(f'corrected: {corrected}')
                 print()
-    if len(corrections) > 0:
+    if corrections:
         corrected_xml = original_xml
         original_last_change = doc.xpath("//pagexml:Metadata/pagexml:LastChange", namespaces={
             'pagexml': 'http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15'})[0].text
