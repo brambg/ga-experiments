@@ -27,11 +27,11 @@ class LexiconUtil:
         conn.close()
 
     def find(self, regexp: str, limit: int = 10, ignore_case: bool = False):
-        r = re.compile(f"^{regexp}$")
         if ignore_case:
-            matching_words = [w for w in self.words if r.match(w, re.IGNORECASE)]
+            r = re.compile(f"^{regexp}$", re.IGNORECASE)
         else:
-            matching_words = [w for w in self.words if r.match(w)]
+            r = re.compile(f"^{regexp}$")
+        matching_words = [w for w in self.words if r.match(w)]
         if matching_words:
             for word in matching_words:
                 print(f"'{word}' found in: (limit={limit})\n")
@@ -57,8 +57,11 @@ class LexiconUtil:
             print(f"no words found matching '{regexp}'")
         print("")
 
-    def words_like(self, regexp: str) -> List[str]:
-        r = re.compile(f"^{regexp}$")
+    def words_like(self, regexp: str, ignore_case=False) -> List[str]:
+        if ignore_case:
+            r = re.compile(f"^{regexp}$", re.IGNORECASE)
+        else:
+            r = re.compile(f"^{regexp}$")
         return [w for w in self.words if r.match(w)]
 
     def _concordance(self, path: str, word: str):
@@ -91,5 +94,5 @@ def find(regexp: str, limit: int = 10, ignore_case=False):
     lu.find(regexp, limit, ignore_case)
 
 
-def words_like(regexp: str) -> List[str]:
-    return lu.words_like(regexp)
+def words_like(regexp: str, ignore_case=False) -> List[str]:
+    return lu.words_like(regexp, ignore_case)
