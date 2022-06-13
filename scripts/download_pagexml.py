@@ -7,10 +7,12 @@ import os
 import re
 import time
 from os.path import exists
+from icecream import ic
 
 import requests
 
-ARCHIVE_INFO_CSV = "data/HTR aanvulling 202108.csv"
+ARCHIVE_INFO_CSV = "data/incomplete_archives.csv"
+# ARCHIVE_INFO_CSV = "data/HTR aanvulling 202108.csv"
 PAGE_INFO_JSON = "data/page_info.json"
 PAGEXML_BASE_DIR = "out/pagexml"
 DOWNLOADED_ARCHIVES_JSON = "out/downloaded_archives.json"
@@ -65,14 +67,27 @@ def sanitize_titles(items, new_htr_archives):
     return items
 
 
+def get_items():
+    items = []
+    url = "https://transkribus.eu/r/search-read/documents"
+    headers = {"Content-Type": "application/json"}
+    page = 0
+    go_on = True
+    while go_on:
+        body = {"collections": [85448], "offset": page * 1024, "limit": 1024}
+        result = requests.post(url=url, headers=headers, json=body).json()
+        page_items = result['items']
+        items.extend(page_items)
+        size = len(page_items)
+        go_on = size == 1024
+        if go_on:
+            page += 1
+    return items
+
+
 def main():
     print("> downloading relevant document info:")
-    url = "https://transkribus.eu/r/search-read/documents"
-    print(f"> GET {url}")
-    headers = {"Content-Type": "application/json"}
-    body = {"collections": [85448], "offset": 0, "limit": 1024}
-    result = requests.post(url=url, headers=headers, json=body).json()
-    items = result['items']
+    items = get_items()
     print(f"< {len(items)} documents found")
 
     print(f"> reading {ARCHIVE_INFO_CSV}: ", end='')
@@ -82,7 +97,7 @@ def main():
     number_of_new_htr_archives = len(new_htr_archives)
     print(f"{number_of_new_htr_archives} newly htr-ed archives")
 
-    items = sanitize_titles(items, new_htr_archives)
+    # items = sanitize_titles(items, new_htr_archives)
 
     title2id = {item['title']: item['id'] for item in items}
 
@@ -100,7 +115,7 @@ def main():
         print(f"    archive {title} ({i + 1}/{number_of_new_htr_archives}): ", end='')
         if title in downloaded_archives:
             print("already downloaded")
-        else:
+        elif title in title2id:
             pages_info = read_document_page_info(title2id[title], a['AANTAL SCANS'])
             total_pages = len(pages_info)
             print(f"{total_pages} pages")
@@ -125,6 +140,8 @@ def main():
             downloaded_archives.append(title)
             with open(DOWNLOADED_ARCHIVES_JSON, 'w') as f:
                 json.dump(downloaded_archives, f)
+        else:
+            print(" skipping (not found)")
 
     print(f"> writing {PAGE_INFO_JSON}")
     with open(PAGE_INFO_JSON, 'w') as f:
