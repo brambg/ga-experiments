@@ -6,7 +6,7 @@ elucidate-client
 git+https://github.com/knaw-huc/pagexml#egg=pagexml
 icecream==2.1.1
 lxml==4.9.1
-nltk==3.6.6
+nltk==3.9
 numpy
 progressbar33==2.4
 python-dateutil==2.8.1
